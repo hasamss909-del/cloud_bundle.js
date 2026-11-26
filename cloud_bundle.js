@@ -9889,6 +9889,145 @@ SF.RepeatFertilizerModule = class RepeatFertilizerModule extends SF.ModuleBase {
 // Register in SupremeFarm
 SF.modules.register(new SF.RepeatFertilizerModule());
 
+
+
+// --- File: features/MapExplorationModule.js ---
+// ==============================================================
+// 🗺️ استكشاف وكشف الخريطة الشامل (Map & Mine & Balloon Explorer)
+// مستخرجة ومطورة من Auto_Pro V1.7.12 (JID: 17 pro_t_17)
+// ==============================================================
+window.SF = window.SF || {};
+
+SF.MapExplorationModule = class MapExplorationModule extends SF.ModuleBase {
+    constructor() {
+        super('map_explorer', 'استكشاف الخريطة', '🗺️');
+        this.isHooked = false;
+        this.initAutoHooks();
+    }
+
+    render() {
+        return `
+            <div class="sf-card" style="padding: 15px;">
+                <p style="color: var(--sf-text-muted); font-size: 13px; margin-bottom: 15px; text-align: center;">
+                    كشف واستكشاف كامل لخرائط الفعاليات، الكهوف، والمنطاد، وإظهار كل ما هو مخفي تحت الصخور والسحب.
+                </p>
+
+                <!-- بطاقة كشف خريطة المنجم والكهف -->
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                    <div style="font-weight: bold; color: #f39c12; margin-bottom: 6px; font-size: 14px;">
+                        ⛏️ كشف خريطة المنجم والكهوف (X-Ray)
+                    </div>
+                    <div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">
+                        إظهار جميع الألماس، الصناديق الذهبية، الخامات، ومفاتيح الكهف فوراً تحت التراب دون إهدار فؤوس أو متفجرات.
+                    </div>
+                    <button id="sf-btn-reveal-mine" class="sf-btn sf-btn-success" style="width: 100%;">
+                        🔍 تفعيل كشف كنوز المنجم فوراً
+                    </button>
+                </div>
+
+                <!-- بطاقة استكشاف وتجاوز خريطة المنطاد -->
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                    <div style="font-weight: bold; color: #3498db; margin-bottom: 6px; font-size: 14px;">
+                        🎈 استكشاف خريطة المنطاد والمغامرة (Sky Explorer)
+                    </div>
+                    <div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">
+                        فتح أي سحابة في أي مكان على الخريطة دون الحاجة للالتزام بالمسار أو المربعات المجاورة، مع كشف محتوى السحب مسبقاً وفك قفل المراحل.
+                    </div>
+                    <button id="sf-btn-unlock-sky" class="sf-btn" style="width: 100%; background: #3498db; color: #fff; font-weight: bold;">
+                        ☁️ فك قيود سحب المنطاد وكشف الجوائز
+                    </button>
+                </div>
+
+                <!-- شريط الحالة -->
+                <div id="sf-explore-status" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px; font-size: 12px; color: #2ecc71; text-align: center; font-weight: bold;">
+                    ✅ نظام استكشاف الخريطة جاهز ونشط في الخلفية
+                </div>
+            </div>
+        `;
+    }
+
+    bindEvents() {
+        const btnMine = this.container.querySelector('#sf-btn-reveal-mine');
+        const btnSky = this.container.querySelector('#sf-btn-unlock-sky');
+        const statusBox = this.container.querySelector('#sf-explore-status');
+
+        if (btnMine) {
+            btnMine.onclick = () => {
+                this.applyMineXRay();
+                if (statusBox) statusBox.innerText = "✨ تم تفعيل كشف خريطة المنجم بنجاح! افتح الكهف وستظهر جميع الكنوز.";
+            };
+        }
+
+        if (btnSky) {
+            btnSky.onclick = () => {
+                this.applySkyAdventureBypass();
+                if (statusBox) statusBox.innerText = "☁️ تم فك قيود سحب المنطاد! يمكنك الآن الضغط على أي سحابة وفتحها مباشرة.";
+            };
+        }
+    }
+
+    initAutoHooks() {
+        if (this.isHooked) return;
+        this.isHooked = true;
+
+        const checkTimer = setInterval(() => {
+            const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+            if (gw.DigMiningItem || gw.SkyAdventureItem) {
+                this.applyMineXRay();
+                this.applySkyAdventureBypass();
+                clearInterval(checkTimer);
+            }
+        }, 1500);
+    }
+
+    applyMineXRay() {
+        try {
+            const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+            if (gw.DigMiningItem && gw.DigMiningItem.prototype) {
+                gw.DigMiningItem.prototype.showStete = function(state) {
+                    if (this.greenImg) this.greenImg.visible = false;
+                    if (this.redImg) this.redImg.visible = false;
+                    this.canShow = 1;
+                    if (typeof this.stateShow === 'function') this.stateShow(1);
+                    if (typeof this.showTreasure === 'function') this.showTreasure(1);
+                    if (state == 1 && this.greenImg) this._curStateImg = this.greenImg;
+                    if (state == 2 && this.redImg) this._curStateImg = this.redImg;
+                };
+                console.log("[SupremeFarm] ⛏️ تم تطبيق كشف خريطة المنجم (Mine X-Ray Hooked)!");
+            }
+        } catch (e) {
+            console.error("[MapExploration] Mine X-Ray error:", e);
+        }
+    }
+
+    applySkyAdventureBypass() {
+        try {
+            const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+            if (gw.SkyAdventureItem && gw.SkyAdventureItem.prototype) {
+                gw.SkyAdventureItem.prototype.checkCanOpen = function() {
+                    return true;
+                };
+                gw.SkyAdventureItem.prototype.checkCanExit = function() {
+                    return true;
+                };
+                gw.SkyAdventureItem.prototype.checkIsPreview = function() {
+                    return (gw.ServerTime && gw.ServerTime.timestamp) || Date.now();
+                };
+                console.log("[SupremeFarm] 🎈 تم تطبيق فك قيود وكشف سحب المنطاد (SkyAdventure Bypass Hooked)!");
+            }
+
+            if (gw.GF && gw.GF.skyAdventureModel && gw.GF.skyAdventureModel.data) {
+                gw.GF.skyAdventureModel.data.locked = false;
+            }
+        } catch (e) {
+            console.error("[MapExploration] SkyAdventure error:", e);
+        }
+    }
+};
+
+// Register in SupremeFarm
+SF.modules.register(new SF.MapExplorationModule());
+
 // --- System Initialization ---
 (function() {
     'use strict';
