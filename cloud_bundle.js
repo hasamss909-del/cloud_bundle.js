@@ -9635,6 +9635,260 @@ SF.modules.register(new SF.BalloonModule());
     }
 })();
 
+
+
+// --- File: features/RepeatFertilizerModule.js ---
+// ==============================================================
+// 🌱 تكرار التسميد والسقيا الفوري (Instant Repeat Fertilize & Water)
+// مستخرجة ومطورة من Auto_Pro V1.7.12
+// ==============================================================
+window.SF = window.SF || {};
+
+SF.RepeatFertilizerModule = class RepeatFertilizerModule extends SF.ModuleBase {
+    constructor() {
+        super('repeat_fertilizer', 'تكرار التسميد والسقيا', '🌱');
+        this.isRunning = false;
+        this.stopRequested = false;
+    }
+
+    render() {
+        return `
+            <div class="sf-card" style="padding: 15px;">
+                <p style="color: var(--sf-text-muted); font-size: 13px; margin-bottom: 12px; text-align: center;">
+                    تكرار التسميد والسقاية الفوري لمحصول أو شجرة معينة لحصد آلاف المحاصيل ونقاط الخبرة في ثوانٍ.
+                </p>
+
+                <!-- نوع الهدف -->
+                <div style="display:flex; gap:10px; margin-bottom:12px;">
+                    <button id="sf-rf-type-crop" class="sf-btn" style="flex:1; background:var(--sf-primary); color:#fff; font-weight:bold;">🌾 المحاصيل (بذور)</button>
+                    <button id="sf-rf-type-tree" class="sf-btn" style="flex:1; background:#333; color:#bbb;">🌴 الأشجار</button>
+                </div>
+
+                <!-- إعدادات المحصول أو الشجرة -->
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-size:12px; color:#3498db; font-weight:bold;">1. العنصر المستهدف:</span>
+                        <button id="sf-rf-btn-scan-targets" class="sf-btn" style="padding:4px 10px; font-size:11px;">🔍 فحص العناصر المتاحة</button>
+                    </div>
+                    <select id="sf-rf-select-item" style="width:100%; background:#222; color:#fff; border:1px solid #3498db; padding:7px; border-radius:4px; font-size:12px; margin-bottom:8px;">
+                        <option value="">-- اضغط فحص لاختيار البذرة أو الشجرة --</option>
+                    </select>
+
+                    <div style="font-size:12px; color:#f1c40f; font-weight:bold; margin-bottom:6px;">2. مصدر ونوع السماد/الماء:</div>
+                    <select id="sf-rf-select-fert" style="width:100%; background:#222; color:#fff; border:1px solid #f1c40f; padding:7px; border-radius:4px; font-size:12px; margin-bottom:8px;">
+                        <option value="auto">✨ استخدام السماد الخارق تلقائياً</option>
+                        <option value="normal">💧 استخدام السماد/الدلو العادي</option>
+                    </select>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                        <span style="font-size:12px; color:#2ecc71; font-weight:bold;">3. عدد دورات التكرار:</span>
+                        <input type="number" id="sf-rf-repeat-count" value="50" min="1" max="9999" style="width:100px; background:#111; color:#2ecc71; border:1px solid #2ecc71; padding:5px 8px; border-radius:4px; text-align:center; font-weight:bold; font-size:13px;" />
+                    </div>
+                </div>
+
+                <!-- أزرار البدء والتحكم -->
+                <div style="display:flex; gap:8px; margin-bottom:10px;">
+                    <button id="sf-rf-btn-start" class="sf-btn sf-btn-success" style="flex:1; font-size:14px; padding:10px; font-weight:bold;">▶ بدء التكرار الفوري</button>
+                    <button id="sf-rf-btn-stop" class="sf-btn" disabled style="background:#e74c3c; padding:10px; font-weight:bold;">⏹ إيقاف</button>
+                </div>
+
+                <!-- سجل التقدم -->
+                <div id="sf-rf-progress" style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:10px; font-size:11px; color:#a4b0be; height:90px; overflow-y:auto; font-family:monospace; text-align:right;">
+                    [النظام] جاهز لضبط التسميد والسقاية...
+                </div>
+            </div>
+        `;
+    }
+
+    bindEvents() {
+        let currentMode = 'seeds';
+        const tabCrop = this.container.querySelector('#sf-rf-type-crop');
+        const tabTree = this.container.querySelector('#sf-rf-type-tree');
+        const selectItem = this.container.querySelector('#sf-rf-select-item');
+        const selectFert = this.container.querySelector('#sf-rf-select-fert');
+        const inputCount = this.container.querySelector('#sf-rf-repeat-count');
+        const btnScan = this.container.querySelector('#sf-rf-btn-scan-targets');
+        const btnStart = this.container.querySelector('#sf-rf-btn-start');
+        const btnStop = this.container.querySelector('#sf-rf-btn-stop');
+        const logBox = this.container.querySelector('#sf-rf-progress');
+
+        const log = (msg) => {
+            if (logBox) {
+                logBox.innerHTML = `<div>${msg}</div>` + logBox.innerHTML;
+            }
+            console.log(`[RepeatFertilizer] ${msg}`);
+        };
+
+        tabCrop.onclick = () => {
+            currentMode = 'seeds';
+            tabCrop.style.background = 'var(--sf-primary)'; tabCrop.style.color = '#fff';
+            tabTree.style.background = '#333'; tabTree.style.color = '#bbb';
+            this.populateItems(selectItem, currentMode, log);
+        };
+
+        tabTree.onclick = () => {
+            currentMode = 'trees';
+            tabTree.style.background = 'var(--sf-primary)'; tabTree.style.color = '#fff';
+            tabCrop.style.background = '#333'; tabCrop.style.color = '#bbb';
+            this.populateItems(selectItem, currentMode, log);
+        };
+
+        btnScan.onclick = () => {
+            this.populateItems(selectItem, currentMode, log);
+        };
+
+        btnStart.onclick = async () => {
+            const itemId = parseInt(selectItem.value);
+            if (!itemId) {
+                alert("يرجى اختيار العنصر المستهدف (بذرة أو شجرة) أولاً!");
+                return;
+            }
+            const count = parseInt(inputCount.value) || 10;
+            const fertMode = selectFert.value;
+
+            this.isRunning = true;
+            this.stopRequested = false;
+            btnStart.disabled = true;
+            btnStop.disabled = false;
+
+            log(`🚀 بدء عملية التكرار (${count} دورة) على العنصر ID: ${itemId}...`);
+            await this.executeRepeat(currentMode, itemId, count, fertMode, log);
+
+            this.isRunning = false;
+            btnStart.disabled = false;
+            btnStop.disabled = true;
+            log(`✅ اكتملت العملية أو تم إيقافها.`);
+        };
+
+        btnStop.onclick = () => {
+            if (this.isRunning) {
+                this.stopRequested = true;
+                log(`⏳ جاري إيقاف التكرار عند نهاية الدورة الحالية...`);
+            }
+        };
+    }
+
+    populateItems(selectEl, mode, log) {
+        selectEl.innerHTML = '';
+        const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+        const store = (gw.Config && gw.Config.Store) || (gw.GF && gw.GF.Config && gw.GF.Config.Store);
+
+        if (!store) {
+            selectEl.innerHTML = '<option value="">⚠️ متجر اللعبة غير محمل بعد</option>';
+            return;
+        }
+
+        let count = 0;
+        for (let k in store) {
+            const it = store[k];
+            if (it && it.type === mode && it.name) {
+                const opt = document.createElement('option');
+                opt.value = it.id;
+                opt.textContent = `${it.name} (ID: ${it.id})`;
+                selectEl.appendChild(opt);
+                count++;
+            }
+        }
+        log(`🔍 تم العثور على ${count} عنصر من نوع ${mode === 'seeds' ? 'البذور' : 'الأشجار'}.`);
+    }
+
+    async executeRepeat(mode, itemId, totalCycles, fertMode, log) {
+        const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
+        if (!gw.GF || !gw.GF.loginModel || !gw.NetUtils) {
+            log("❌ محرك اللعبة غير جاهز بعد.");
+            return;
+        }
+
+        const loginModel = gw.GF.loginModel;
+        const loginProxy = gw.GF.loginController && gw.GF.loginController.loginProxy;
+        const appData = loginModel.AppData || {};
+
+        let targetCell = null;
+        if (mode === 'seeds') {
+            const soils = appData.soil || [];
+            targetCell = soils.find(s => s && (s.id == 1 || s.id == 201473 || s.id == 222657)) || soils[0];
+            if (!targetCell) {
+                log("⚠️ لم يتم العثور على أرض زراعية فارغة.");
+                return;
+            }
+        } else {
+            const trees = appData.trees || [];
+            targetCell = trees.find(t => t && t.id == itemId) || trees[0];
+            if (!targetCell) {
+                log("⚠️ لم يتم العثور على الشجرة المحددة في المزرعة.");
+                return;
+            }
+        }
+
+        log(`🌾 الخلية المحددة: [${mode === 'seeds' ? 'أرض' : 'شجرة'}] في (${targetCell.x}, ${targetCell.y})`);
+
+        let completed = 0;
+        for (let i = 1; i <= totalCycles; i++) {
+            if (this.stopRequested) {
+                log(`🛑 تم إيقاف التكرار يدوياً عند الدورة ${i - 1}.`);
+                break;
+            }
+
+            try {
+                if (mode === 'seeds') {
+                    const itemData = gw.Config && gw.Config.Store_GetItemData ? gw.Config.Store_GetItemData(itemId) : { id: itemId, price: 10 };
+                    if (loginModel.shopBuy) loginModel.shopBuy(itemData, 1);
+
+                    gw.NetUtils.enqueue("add_plant.save_data", {
+                        unique_id: Date.now() + i,
+                        plant_id: targetCell.id,
+                        soil_x: targetCell.x,
+                        soil_y: targetCell.y,
+                        isOnSuperSoil: targetCell.superSoil || false,
+                        qty: 1,
+                        greenhouse_id: 100249,
+                        greenhouse_x: targetCell.x,
+                        greenhouse_y: targetCell.y
+                    });
+
+                    if (loginProxy && typeof loginProxy.fertilizer === 'function') {
+                        loginProxy.fertilizer({ id: 10003 }, { id: targetCell.id, grid_x: targetCell.x, grid_y: targetCell.y }, "fusor");
+                    }
+
+                    gw.NetUtils.enqueue("harvest_crop.save_data", {
+                        x: targetCell.x,
+                        y: targetCell.y,
+                        id: itemId
+                    });
+                } else {
+                    if (loginProxy && typeof loginProxy.waterTree === 'function') {
+                        loginProxy.waterTree(
+                            { id: 205931, uses_left: 999 },
+                            { map_unique_id: targetCell.id, id: targetCell.id, grid_x: targetCell.x, grid_y: targetCell.y },
+                            "fusor"
+                        );
+                    }
+
+                    gw.NetUtils.enqueue("harvest_tree.save_data", {
+                        id: targetCell.id,
+                        x: targetCell.x,
+                        y: targetCell.y
+                    });
+                }
+
+                completed++;
+                if (i % 10 === 0 || i === totalCycles) {
+                    log(`⚡ تقدم التكرار: ${i}/${totalCycles} دورة مكتملة...`);
+                }
+
+                await new Promise(r => setTimeout(r, 60));
+            } catch (cycleErr) {
+                console.error("Cycle error:", cycleErr);
+            }
+        }
+
+        log(`🎉 تم الانتهاء بنجاح من ${completed} دورة تكرار! تم حصد الناتج وإضافته للمخزن.`);
+    }
+};
+
+// Register in SupremeFarm
+SF.modules.register(new SF.RepeatFertilizerModule());
+
 // --- System Initialization ---
 (function() {
     'use strict';
