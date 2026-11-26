@@ -9534,86 +9534,6 @@ new SF.CustomBackgroundModule();
 
 
 
-// --- File: features/BalloonModule.js ---
-// ==============================================================
-// 🎈 رحلة ومغامرة المنطاد (Air Adventure & MapClean Balloon Module)
-// تم دمج وحدتي المنطاد (Mod #98: خريطة المنطاد و Mod #107: المغامرة الجوية)
-// ==============================================================
-window.SF = window.SF || {};
-
-SF.BalloonModule = class BalloonModule extends SF.ModuleBase {
-    constructor() {
-        super('balloon_adventure', 'رحلة ومغامرة المنطاد', '🎈');
-    }
-
-    render() {
-        return `
-            <div class="sf-card" style="padding: 15px;">
-                <p style="color: var(--sf-text-muted); font-size: 13px; margin-bottom: 15px; text-align: center;">
-                    وحدة التحكم الشاملة لرحلة المنطاد والمغامرة الجوية.
-                </p>
-
-                <!-- بطاقة خريطة المنطاد (MapClean) -->
-                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                    <div style="font-weight: bold; color: #3498db; margin-bottom: 8px; font-size: 14px;">
-                        🗺️ رحلة استكشاف المنطاد (تنظيف الخريطة)
-                    </div>
-                    <div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">
-                        إزالة الضباب تلقائياً، شق المسارات، استلام الإنتاج وجمع الموارد، مع مضاعفة سرعة حركة المنطاد.
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button id="sf-btn-balloon-start" class="sf-btn sf-btn-success" style="flex: 1;">▶ تشغيل التنظيف التلقائي</button>
-                        <button id="sf-btn-balloon-stop" class="sf-btn" style="flex: 1; background: #e74c3c;">⏹ إيقاف</button>
-                    </div>
-                </div>
-
-                <!-- بطاقة المغامرة الجوية (SkyAdventure) -->
-                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px;">
-                    <div style="font-weight: bold; color: #f1c40f; margin-bottom: 8px; font-size: 14px;">
-                        ☁️ المغامرة الجوية للمنطاد (القلوب والجوائز)
-                    </div>
-                    <div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">
-                        فتح السحب التلقائي، صيد القلوب المجانية، الصناديق الكبيرة والصغيرة، وتخطي المراحل فور اكتمال الأهداف.
-                    </div>
-                    <div style="font-size: 12px; color: #2ecc71; text-align: center; font-weight: bold; padding: 6px; background: rgba(0,0,0,0.4); border-radius: 4px;">
-                        ✅ أداة المغامرة الجوية تعمل تلقائياً بمجرد فتح نافذة الفعالية
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    bindEvents() {
-        const btnStart = this.container.querySelector('#sf-btn-balloon-start');
-        const btnStop = this.container.querySelector('#sf-btn-balloon-stop');
-
-        if (btnStart) {
-            btnStart.onclick = () => {
-                const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-                if (gw.megaahmedmega && typeof gw.megaahmedmega.start === 'function') {
-                    gw.megaahmedmega.start();
-                    btnStart.innerText = "⏳ جاري التنظيف...";
-                } else {
-                    alert("يرجى فتح نافذة رحلة المنطاد في اللعبة أولاً لتفعيل المحرك.");
-                }
-            };
-        }
-
-        if (btnStop) {
-            btnStop.onclick = () => {
-                const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-                if (gw.megaahmedmega && typeof gw.megaahmedmega.stop === 'function') {
-                    gw.megaahmedmega.stop();
-                    if (btnStart) btnStart.innerText = "▶ تشغيل التنظيف التلقائي";
-                }
-            };
-        }
-    }
-};
-
-// Register in SupremeFarm UI
-SF.modules.register(new SF.BalloonModule());
-
 // --- Balloon Engine Shared Polyfills & Boot ---
 (function() {
     var _0x48b7 = function() { return ''; };
@@ -9637,353 +9557,16 @@ SF.modules.register(new SF.BalloonModule());
 
 
 
-// --- File: features/RepeatFertilizerModule.js ---
-// ==============================================================
-// 🌱 تكرار التسميد والسقيا الفوري (Instant Repeat Fertilize & Water)
-// مستخرجة ومطورة من Auto_Pro V1.7.12
-// ==============================================================
-window.SF = window.SF || {};
 
-SF.RepeatFertilizerModule = class RepeatFertilizerModule extends SF.ModuleBase {
-    constructor() {
-        super('repeat_fertilizer', 'تكرار التسميد والسقيا', '🌱');
-        this.isRunning = false;
-        this.stopRequested = false;
-    }
-
-    render() {
-        return `
-            <div class="sf-card" style="padding: 15px;">
-                <p style="color: var(--sf-text-muted); font-size: 13px; margin-bottom: 12px; text-align: center;">
-                    تكرار التسميد والسقاية الفوري لمحصول أو شجرة معينة لحصد آلاف المحاصيل ونقاط الخبرة في ثوانٍ.
-                </p>
-
-                <!-- نوع الهدف -->
-                <div style="display:flex; gap:10px; margin-bottom:12px;">
-                    <button id="sf-rf-type-crop" class="sf-btn" style="flex:1; background:var(--sf-primary); color:#fff; font-weight:bold;">🌾 المحاصيل (بذور)</button>
-                    <button id="sf-rf-type-tree" class="sf-btn" style="flex:1; background:#333; color:#bbb;">🌴 الأشجار</button>
-                </div>
-
-                <!-- إعدادات المحصول أو الشجرة -->
-                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span style="font-size:12px; color:#3498db; font-weight:bold;">1. العنصر المستهدف:</span>
-                        <button id="sf-rf-btn-scan-targets" class="sf-btn" style="padding:4px 10px; font-size:11px;">🔍 فحص العناصر المتاحة</button>
-                    </div>
-                    <select id="sf-rf-select-item" style="width:100%; background:#222; color:#fff; border:1px solid #3498db; padding:7px; border-radius:4px; font-size:12px; margin-bottom:8px;">
-                        <option value="">-- اضغط فحص لاختيار البذرة أو الشجرة --</option>
-                    </select>
-
-                    <div style="font-size:12px; color:#f1c40f; font-weight:bold; margin-bottom:6px;">2. مصدر ونوع السماد/الماء:</div>
-                    <select id="sf-rf-select-fert" style="width:100%; background:#222; color:#fff; border:1px solid #f1c40f; padding:7px; border-radius:4px; font-size:12px; margin-bottom:8px;">
-                        <option value="auto">✨ استخدام السماد الخارق تلقائياً</option>
-                        <option value="normal">💧 استخدام السماد/الدلو العادي</option>
-                    </select>
-
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
-                        <span style="font-size:12px; color:#2ecc71; font-weight:bold;">3. عدد دورات التكرار:</span>
-                        <input type="number" id="sf-rf-repeat-count" value="50" min="1" max="9999" style="width:100px; background:#111; color:#2ecc71; border:1px solid #2ecc71; padding:5px 8px; border-radius:4px; text-align:center; font-weight:bold; font-size:13px;" />
-                    </div>
-                </div>
-
-                <!-- أزرار البدء والتحكم -->
-                <div style="display:flex; gap:8px; margin-bottom:10px;">
-                    <button id="sf-rf-btn-start" class="sf-btn sf-btn-success" style="flex:1; font-size:14px; padding:10px; font-weight:bold;">▶ بدء التكرار الفوري</button>
-                    <button id="sf-rf-btn-stop" class="sf-btn" disabled style="background:#e74c3c; padding:10px; font-weight:bold;">⏹ إيقاف</button>
-                </div>
-
-                <!-- سجل التقدم -->
-                <div id="sf-rf-progress" style="background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:10px; font-size:11px; color:#a4b0be; height:90px; overflow-y:auto; font-family:monospace; text-align:right;">
-                    [النظام] جاهز لضبط التسميد والسقاية...
-                </div>
-            </div>
-        `;
-    }
-
-    bindEvents() {
-        let currentMode = 'seeds';
-        const tabCrop = this.container.querySelector('#sf-rf-type-crop');
-        const tabTree = this.container.querySelector('#sf-rf-type-tree');
-        const selectItem = this.container.querySelector('#sf-rf-select-item');
-        const selectFert = this.container.querySelector('#sf-rf-select-fert');
-        const inputCount = this.container.querySelector('#sf-rf-repeat-count');
-        const btnScan = this.container.querySelector('#sf-rf-btn-scan-targets');
-        const btnStart = this.container.querySelector('#sf-rf-btn-start');
-        const btnStop = this.container.querySelector('#sf-rf-btn-stop');
-        const logBox = this.container.querySelector('#sf-rf-progress');
-
-        const log = (msg) => {
-            if (logBox) {
-                logBox.innerHTML = `<div>${msg}</div>` + logBox.innerHTML;
-            }
-            console.log(`[RepeatFertilizer] ${msg}`);
-        };
-
-        tabCrop.onclick = () => {
-            currentMode = 'seeds';
-            tabCrop.style.background = 'var(--sf-primary)'; tabCrop.style.color = '#fff';
-            tabTree.style.background = '#333'; tabTree.style.color = '#bbb';
-            this.populateItems(selectItem, currentMode, log);
-        };
-
-        tabTree.onclick = () => {
-            currentMode = 'trees';
-            tabTree.style.background = 'var(--sf-primary)'; tabTree.style.color = '#fff';
-            tabCrop.style.background = '#333'; tabCrop.style.color = '#bbb';
-            this.populateItems(selectItem, currentMode, log);
-        };
-
-        btnScan.onclick = () => {
-            this.populateItems(selectItem, currentMode, log);
-        };
-
-        btnStart.onclick = async () => {
-            const itemId = parseInt(selectItem.value);
-            if (!itemId) {
-                alert("يرجى اختيار العنصر المستهدف (بذرة أو شجرة) أولاً!");
-                return;
-            }
-            const count = parseInt(inputCount.value) || 10;
-            const fertMode = selectFert.value;
-
-            this.isRunning = true;
-            this.stopRequested = false;
-            btnStart.disabled = true;
-            btnStop.disabled = false;
-
-            log(`🚀 بدء عملية التكرار (${count} دورة) على العنصر ID: ${itemId}...`);
-            await this.executeRepeat(currentMode, itemId, count, fertMode, log);
-
-            this.isRunning = false;
-            btnStart.disabled = false;
-            btnStop.disabled = true;
-            log(`✅ اكتملت العملية أو تم إيقافها.`);
-        };
-
-        btnStop.onclick = () => {
-            if (this.isRunning) {
-                this.stopRequested = true;
-                log(`⏳ جاري إيقاف التكرار عند نهاية الدورة الحالية...`);
-            }
-        };
-    }
-
-    populateItems(selectEl, mode, log) {
-        selectEl.innerHTML = '';
-        const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-        const store = (gw.Config && gw.Config.Store) || (gw.GF && gw.GF.Config && gw.GF.Config.Store);
-
-        if (!store) {
-            selectEl.innerHTML = '<option value="">⚠️ متجر اللعبة غير محمل بعد</option>';
-            return;
-        }
-
-        let count = 0;
-        for (let k in store) {
-            const it = store[k];
-            if (it && it.type === mode && it.name) {
-                const opt = document.createElement('option');
-                opt.value = it.id;
-                opt.textContent = `${it.name} (ID: ${it.id})`;
-                selectEl.appendChild(opt);
-                count++;
-            }
-        }
-        log(`🔍 تم العثور على ${count} عنصر من نوع ${mode === 'seeds' ? 'البذور' : 'الأشجار'}.`);
-    }
-
-    async executeRepeat(mode, itemId, totalCycles, fertMode, log) {
-        const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-        if (!gw.GF || !gw.GF.loginModel || !gw.NetUtils) {
-            log("❌ محرك اللعبة غير جاهز بعد.");
-            return;
-        }
-
-        const loginModel = gw.GF.loginModel;
-        const loginProxy = gw.GF.loginController && gw.GF.loginController.loginProxy;
-        const appData = loginModel.AppData || {};
-
-        let targetCell = null;
-        if (mode === 'seeds') {
-            const soils = appData.soil || [];
-            targetCell = soils.find(s => s && (s.id == 1 || s.id == 201473 || s.id == 222657)) || soils[0];
-            if (!targetCell) {
-                log("⚠️ لم يتم العثور على أرض زراعية فارغة.");
-                return;
-            }
-        } else {
-            const trees = appData.trees || [];
-            targetCell = trees.find(t => t && t.id == itemId) || trees[0];
-            if (!targetCell) {
-                log("⚠️ لم يتم العثور على الشجرة المحددة في المزرعة.");
-                return;
-            }
-        }
-
-        log(`🌾 الخلية المحددة: [${mode === 'seeds' ? 'أرض' : 'شجرة'}] في (${targetCell.x}, ${targetCell.y})`);
-
-        let completed = 0;
-        for (let i = 1; i <= totalCycles; i++) {
-            if (this.stopRequested) {
-                log(`🛑 تم إيقاف التكرار يدوياً عند الدورة ${i - 1}.`);
-                break;
-            }
-
-            try {
-                if (mode === 'seeds') {
-                    const itemData = gw.Config && gw.Config.Store_GetItemData ? gw.Config.Store_GetItemData(itemId) : { id: itemId, price: 10 };
-                    if (loginModel.shopBuy) loginModel.shopBuy(itemData, 1);
-
-                    gw.NetUtils.enqueue("add_plant.save_data", {
-                        unique_id: Date.now() + i,
-                        plant_id: targetCell.id,
-                        soil_x: targetCell.x,
-                        soil_y: targetCell.y,
-                        isOnSuperSoil: targetCell.superSoil || false,
-                        qty: 1,
-                        greenhouse_id: 100249,
-                        greenhouse_x: targetCell.x,
-                        greenhouse_y: targetCell.y
-                    });
-
-                    if (loginProxy && typeof loginProxy.fertilizer === 'function') {
-                        loginProxy.fertilizer({ id: 10003 }, { id: targetCell.id, grid_x: targetCell.x, grid_y: targetCell.y }, "fusor");
-                    }
-
-                    gw.NetUtils.enqueue("harvest_crop.save_data", {
-                        x: targetCell.x,
-                        y: targetCell.y,
-                        id: itemId
-                    });
-                } else {
-                    if (loginProxy && typeof loginProxy.waterTree === 'function') {
-                        loginProxy.waterTree(
-                            { id: 205931, uses_left: 999 },
-                            { map_unique_id: targetCell.id, id: targetCell.id, grid_x: targetCell.x, grid_y: targetCell.y },
-                            "fusor"
-                        );
-                    }
-
-                    gw.NetUtils.enqueue("harvest_tree.save_data", {
-                        id: targetCell.id,
-                        x: targetCell.x,
-                        y: targetCell.y
-                    });
-                }
-
-                completed++;
-                if (i % 10 === 0 || i === totalCycles) {
-                    log(`⚡ تقدم التكرار: ${i}/${totalCycles} دورة مكتملة...`);
-                }
-
-                await new Promise(r => setTimeout(r, 60));
-            } catch (cycleErr) {
-                console.error("Cycle error:", cycleErr);
-            }
-        }
-
-        log(`🎉 تم الانتهاء بنجاح من ${completed} دورة تكرار! تم حصد الناتج وإضافته للمخزن.`);
-    }
-};
-
-// Register in SupremeFarm
-SF.modules.register(new SF.RepeatFertilizerModule());
-
-
-
-// --- File: features/MapExplorationModule.js ---
-// ==============================================================
-// 🗺️ استكشاف وكشف الخريطة الشامل (Map & Mine & Balloon Explorer)
-// مستخرجة ومطورة من Auto_Pro V1.7.12 (JID: 17 pro_t_17)
-// ==============================================================
-window.SF = window.SF || {};
-
-SF.MapExplorationModule = class MapExplorationModule extends SF.ModuleBase {
-    constructor() {
-        super('map_explorer', 'استكشاف الخريطة', '🗺️');
-        this.isHooked = false;
-        this.initAutoHooks();
-    }
-
-    render() {
-        return `
-            <div class="sf-card" style="padding: 15px;">
-                <p style="color: var(--sf-text-muted); font-size: 13px; margin-bottom: 15px; text-align: center;">
-                    كشف واستكشاف كامل لخرائط الفعاليات، الكهوف، والمنطاد، وإظهار كل ما هو مخفي تحت الصخور والسحب.
-                </p>
-
-                <!-- بطاقة كشف خريطة المنجم والكهف -->
-                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                    <div style="font-weight: bold; color: #f39c12; margin-bottom: 6px; font-size: 14px;">
-                        ⛏️ كشف خريطة المنجم والكهوف (X-Ray)
-                    </div>
-                    <div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">
-                        إظهار جميع الألماس، الصناديق الذهبية، الخامات، ومفاتيح الكهف فوراً تحت التراب دون إهدار فؤوس أو متفجرات.
-                    </div>
-                    <button id="sf-btn-reveal-mine" class="sf-btn sf-btn-success" style="width: 100%;">
-                        🔍 تفعيل كشف كنوز المنجم فوراً
-                    </button>
-                </div>
-
-                <!-- بطاقة استكشاف وتجاوز خريطة المنطاد -->
-                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                    <div style="font-weight: bold; color: #3498db; margin-bottom: 6px; font-size: 14px;">
-                        🎈 استكشاف خريطة المنطاد والمغامرة (Sky Explorer)
-                    </div>
-                    <div style="font-size: 11px; color: #aaa; margin-bottom: 10px;">
-                        فتح أي سحابة في أي مكان على الخريطة دون الحاجة للالتزام بالمسار أو المربعات المجاورة، مع كشف محتوى السحب مسبقاً وفك قفل المراحل.
-                    </div>
-                    <button id="sf-btn-unlock-sky" class="sf-btn" style="width: 100%; background: #3498db; color: #fff; font-weight: bold;">
-                        ☁️ فك قيود سحب المنطاد وكشف الجوائز
-                    </button>
-                </div>
-
-                <!-- شريط الحالة -->
-                <div id="sf-explore-status" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px; font-size: 12px; color: #2ecc71; text-align: center; font-weight: bold;">
-                    ✅ نظام استكشاف الخريطة جاهز ونشط في الخلفية
-                </div>
-            </div>
-        `;
-    }
-
-    bindEvents() {
-        const btnMine = this.container.querySelector('#sf-btn-reveal-mine');
-        const btnSky = this.container.querySelector('#sf-btn-unlock-sky');
-        const statusBox = this.container.querySelector('#sf-explore-status');
-
-        if (btnMine) {
-            btnMine.onclick = () => {
-                this.applyMineXRay();
-                if (statusBox) statusBox.innerText = "✨ تم تفعيل كشف خريطة المنجم بنجاح! افتح الكهف وستظهر جميع الكنوز.";
-            };
-        }
-
-        if (btnSky) {
-            btnSky.onclick = () => {
-                this.applySkyAdventureBypass();
-                if (statusBox) statusBox.innerText = "☁️ تم فك قيود سحب المنطاد! يمكنك الآن الضغط على أي سحابة وفتحها مباشرة.";
-            };
-        }
-    }
-
-    initAutoHooks() {
-        if (this.isHooked) return;
-        this.isHooked = true;
-
-        const checkTimer = setInterval(() => {
-            const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-            if (gw.DigMiningItem || gw.SkyAdventureItem) {
-                this.applyMineXRay();
-                this.applySkyAdventureBypass();
-                clearInterval(checkTimer);
-            }
-        }, 1500);
-    }
-
-    applyMineXRay() {
+// --- Silent Feature: Map & Mine Exploration Hooks (X-Ray & Sky Bypass) ---
+// يعمل بصمت في الخلفية بدون أزرار أو تبويبات في الواجهة
+(function() {
+    'use strict';
+    function applySilentMapHooks() {
         try {
             const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-            if (gw.DigMiningItem && gw.DigMiningItem.prototype) {
+            if (gw.DigMiningItem && gw.DigMiningItem.prototype && !gw.DigMiningItem.prototype._sf_xray) {
+                gw.DigMiningItem.prototype._sf_xray = true;
                 gw.DigMiningItem.prototype.showStete = function(state) {
                     if (this.greenImg) this.greenImg.visible = false;
                     if (this.redImg) this.redImg.visible = false;
@@ -9993,40 +9576,36 @@ SF.MapExplorationModule = class MapExplorationModule extends SF.ModuleBase {
                     if (state == 1 && this.greenImg) this._curStateImg = this.greenImg;
                     if (state == 2 && this.redImg) this._curStateImg = this.redImg;
                 };
-                console.log("[SupremeFarm] ⛏️ تم تطبيق كشف خريطة المنجم (Mine X-Ray Hooked)!");
             }
-        } catch (e) {
-            console.error("[MapExploration] Mine X-Ray error:", e);
-        }
-    }
-
-    applySkyAdventureBypass() {
-        try {
-            const gw = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window;
-            if (gw.SkyAdventureItem && gw.SkyAdventureItem.prototype) {
-                gw.SkyAdventureItem.prototype.checkCanOpen = function() {
-                    return true;
-                };
-                gw.SkyAdventureItem.prototype.checkCanExit = function() {
-                    return true;
-                };
+            if (gw.SkyAdventureItem && gw.SkyAdventureItem.prototype && !gw.SkyAdventureItem.prototype._sf_bypass) {
+                gw.SkyAdventureItem.prototype._sf_bypass = true;
+                gw.SkyAdventureItem.prototype.checkCanOpen = function() { return true; };
+                gw.SkyAdventureItem.prototype.checkCanExit = function() { return true; };
                 gw.SkyAdventureItem.prototype.checkIsPreview = function() {
                     return (gw.ServerTime && gw.ServerTime.timestamp) || Date.now();
                 };
-                console.log("[SupremeFarm] 🎈 تم تطبيق فك قيود وكشف سحب المنطاد (SkyAdventure Bypass Hooked)!");
             }
-
             if (gw.GF && gw.GF.skyAdventureModel && gw.GF.skyAdventureModel.data) {
                 gw.GF.skyAdventureModel.data.locked = false;
             }
-        } catch (e) {
-            console.error("[MapExploration] SkyAdventure error:", e);
-        }
+        } catch(e) {}
     }
-};
 
-// Register in SupremeFarm
-SF.modules.register(new SF.MapExplorationModule());
+    setInterval(applySilentMapHooks, 2000);
+})();
+
+// --- Silent Feature: Mining Assistant (مساعد المنجم) ---
+// يعمل مباشرة داخل المنجم بدون إضافة تبويبات في القائمة الرئيسية
+(function() {
+    'use strict';
+    const _0x48b7 = () => '', _0x4e21 = () => '';
+    const _0x33f3a0 = _0x4e21, _0x13ae06 = _0x48b7;
+    try {
+        (function(){'use strict';const _0x390a52=_0x33f3a0;if(unsafeWindow["__standaloneMinerBooted"])return;unsafeWindow["__standaloneMinerBooted"]=!![];const _0x28324e=()=>{const _0x27147e=_0x390a52,_0x376c88=unsafeWindow['GF'];if(!document["body"]||!_0x376c88?.["loginModel"]){setTimeout(_0x28324e,0x4b0);return;}try{function _0x5f09a9(){'use strict';const _0x474e02=_0x27147e,_0x59724d=_0x48b7;const _0x47cc0a=(_0x186fbc,_0x215310="info")=>{const _0x3d54cb=_0x4e21,_0x5f199a=_0x59724d;try{let _0x451880=document["getElementById"]("miner-standalone-toast");!_0x451880&&(_0x451880=document["createElement"]("div"),_0x451880['id']="miner-standalone-toast",_0x451880["style"]['cssText']="position:fixed;right:18px;bottom:22px;z-index:10000000;padding:10px 16px;border-radius:12px;background:#fff7df;border:1px solid #c77b37;box-shadow:0 5px 18px #0003;color:#542600;font: bold 13px sans-serif;direction:rtl;max-width:320px",document["body"]["appendChild"](_0x451880)),_0x451880['textContent']=_0x186fbc,_0x451880['style']['borderColor']=_0x215310==="error"?"#dc2626":_0x215310==="success"?"#16a34a":_0x215310==="warning"?"#d97706":"#c77b37",clearTimeout(_0x451880["_hideTimer"]),_0x451880["_hideTimer"]=setTimeout(()=>_0x451880['remove'](),0x1068);}catch(_0x2ce102){}},_0xac5dd4=unsafeWindow;function _0x1c9525(_0x771f11){const _0x26212b=_0x59724d,_0x4ec111=_0x4e21;try{if(_0xac5dd4["Url"]&&_0xac5dd4["Url"]["Store_GetUrl_75"]){var _0x4b4b77=_0xac5dd4["Url"]["Store_GetUrl_75"](_0x771f11);if(_0x4b4b77&&_0x4b4b77["includes"]('http'))return _0x4b4b77;}var _0x4b1cfd=_0xac5dd4["Config"]&&_0xac5dd4['Config']["Store_GetItemData"]&&_0xac5dd4["Config"]["Store_GetItemData"](_0x771f11);if(_0x4b1cfd&&_0x4b1cfd["url"])return "https://ffh5.akamaized.net/static/v3/resource/assets/Module/images_75/"+_0x4b1cfd["url"]+".webp";return "https://ffh5.akamaized.net/static/v3/resource/assets/Module/images_75/"+_0x771f11+'.webp';}catch(_0x2e8b74){return'';}}function _0x5a5dd4(_0x21a27e){const _0x2cfea1=_0x4e21,_0xd0141c=_0x59724d,_0xe99162=[];try{const _0x147c63=_0xac5dd4["Url"]&&_0xac5dd4["Url"]["Store_GetUrl_75"]&&_0xac5dd4['Url']["Store_GetUrl_75"](_0x21a27e);if(_0x147c63&&String(_0x147c63)["includes"]("http"))_0xe99162["push"](String(_0x147c63));}catch(_0xe6f89d){}try{const _0x59332d=_0xac5dd4["Config"]&&_0xac5dd4["Config"]["Store_GetItemData"]&&_0xac5dd4["Config"]["Store_GetItemData"](_0x21a27e);if(_0x59332d&&_0x59332d["url"])_0xe99162["push"]("https://ffh5.akamaized.net/static/v3/resource/assets/Module/images_75/"+_0x59332d["url"]+".webp");}catch(_0x3cc76b){}return _0xe99162['push']("https://ffh5.akamaized.net/static/v3/resource/assets/Module/images_75/"+_0x21a27e+".webp"),[...new Set(_0xe99162["filter"](Boolean))];}const _0x357dbe=_0x1c9525;if(unsafeWindow["MinerAuto"]?.["toggleUI"]){unsafeWindow["MinerAuto"]["toggleUI"]();return;}const _0xd9cf81=_0x30dfcb=>new Promise(_0x1b517e=>setTimeout(_0x1b517e,_0x30dfcb)),_0x5d00b1={'pickaxe':!![],'explosive':!![],'tnt':!![]},_0x4b2ce4={'isRunning':![],'currentStrategy':"smart",'quotaTool':'pickaxe','targetFloors':0x14,'targetQuota':0x14,'quotaUsed':0x0,'startDepth':0x0,'floorsDone':0x0,'openTreasurePath':!![],'selectedGifts':new Set([0x363a4,0x363a5,0x363a6,0x363b1,0x363b2,0x363b3,0x363ae,0x363af,0x363b0,0x363b7,0x363b8,0x363b9,0x363ba,0x363bb,0x363bc,0x363b6,0x363b5,0x363b4]),'tools':_0x5d00b1};unsafeWindow["MinerAuto"]=_0x4b2ce4;const _0x3d587d=["#miner-auto-panel { font-family: Cairo, Tahoma, sans-serif !important; position: fixed; top: 30px; left: 10px; z-index: 999999; width: 440px; max-width: calc(100vw - 20px); max-height: calc(100vh - 30px); display: flex; flex-direction: column; background: linear-gradient(to top, rgb(226, 240, 255) 0%, rgb(255, 255, 255) 100%); border: 4px inset #11182780; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); font-family: Cairo, Tahoma, sans-serif; color: #333; direction: rtl; text-align: right; user-select: none; padding: 12px; box-sizing: border-box; }","#miner-auto-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px 10px 6px; font-weight: bold; font-size: 15px; cursor: move; touch-action: none; flex-shrink: 0; direction: ltr; }","#miner-auto-header .miner-title { color: #1456a0; font-size: 16px; font-weight: 700; pointer-events: none; }",".miner-header-actions { display: flex; align-items: center; gap: 8px; }","#miner-auto-drag { cursor: grab; color: #1456a0; font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(20, 86, 160, 0.30); background: rgba(255, 255, 255, 0.85); transition: all 0.2s; touch-action: none; }","#miner-auto-drag:hover { background: #1456a0; color: #fff; }","#miner-auto-close { width: 34px; height: 28px; font-size: 14px; font-weight: 600; border-radius: 10px; cursor: pointer; background-color: #ffded1c2; border: 1px solid rgba(0, 0, 0, 0.23); background-image: linear-gradient(to right, floralwhite, floralwhite, floralwhite); display: flex; align-items: center; justify-content: center; color: #333; font-family: Cairo, Tahoma, sans-serif; transition: all 0.2s; }","#miner-auto-close:hover { border: 1px solid #1456a0; background-image: linear-gradient(to top, #dbeeff, #f4f9ff, #ffffff); }","#miner-auto-body { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-left: 2px; flex: 1; min-height: 0; padding: 4px; scrollbar-width: thin; }",".miner-status { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; color: #555; background: #ffffff; padding: 8px 12px; border-radius: 12px; border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 2px 5px rgb(0 0 0 / 50%); }",".miner-box { border: 1px solid rgba(20, 86, 160, 0.20); padding: 10px; background: rgba(255, 255, 255, 0.7); border-radius: 12px; position: relative; }",".miner-box-title { font-size: 13px; font-weight: 700; color: #1456a0; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }",".miner-dropdown-wrap { position: relative; margin-bottom: 8px; }",".miner-dropdown-toggle { display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; background: #ffffff; border: 1.5px solid rgba(20, 86, 160, 0.30); border-radius: 12px; cursor: pointer; font-size: 12px; font-weight: 700; color: #000000b3; transition: all 0.2s; user-select: none; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }",".miner-dropdown-toggle:hover { border-color: #1456a0; background: #f4f9ff; }",".miner-dropdown-arrow { font-size: 10px; transition: transform 0.2s; }",".miner-dropdown-arrow.open { transform: rotate(180deg); }",".miner-dropdown-menu { display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 1000; background: #ffffff; border: 1.5px solid #1456a0; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); padding: 6px 8px; flex-direction: column; gap: 4px; }",".miner-dropdown-menu.open { display: flex; }","#miner-strat-menu { top: auto; bottom: calc(100% + 4px); box-shadow: 0 -8px 20px rgba(0,0,0,0.2); }",".miner-preset-item { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; color: #333; transition: background 0.15s; }",".miner-preset-item:hover { background: #eaf4ff; color: #1456a0; }",".miner-preset-item input[type='checkbox'] { width: 16px; height: 16px; accent-color: #0044dd; cursor: pointer; margin: 0; flex-shrink: 0; }",".miner-items-container { border: 1px solid rgba(20, 86, 160, 0.20); background: rgba(255, 255, 255, 0.85); border-radius: 6px; padding: 5px; display: flex; gap: 5px; justify-items: stretch; align-items: center; justify-content: center; align-content: center; flex-wrap: wrap; }",".miner-item-chip { position: relative; width: 55px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; }",".miner-item-chip:hover .miner-preview-icon { border-color: #1456a0; transform: translateY(-1px); }",".miner-item-chip.active .miner-preview-icon { border: 1px solid rgba(22, 163, 74, 0.7); }",".miner-item-chip:not(.active) .miner-preview-icon { opacity: 0.35; filter: grayscale(1); }",".miner-preview-icon { width: 55px; height: 45px; object-fit: contain; display: block; border-radius: 6px; background: #fdfdfd; border: 1px solid rgba(0, 0, 0, 0.1); padding: 2px; box-sizing: border-box; transition: all 0.15s; pointer-events: none; }",".miner-check-mark { display: none; position: absolute; top: 1px; left: 3px; color: #16a34a; font-size: 12px; font-weight: bold; line-height: 1; pointer-events: none; z-index: 2; }",".miner-item-chip.active .miner-check-mark { display: block; }",".miner-hidden-badge { display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 600; color: #1456a0; background: #eaf4ff; border: 1px solid #93c5fd; border-radius: 10px; padding: 6px 10px; margin-top: 8px; cursor: pointer; }",".miner-tools-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; direction: rtl; }",".miner-toggle-btn { position: relative; padding: 4px 6px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; direction: rtl; border: 1.5px solid rgba(20, 86, 160, 0.25); background: #ffffff; color: #333; box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-family: Cairo, Tahoma, sans-serif; user-select: none; height: 38px; box-sizing: border-box; }",".miner-toggle-btn:hover { border-color: #1456a0; background: #f4f9ff; }",".miner-toggle-btn.active { border-color: #1456a0; background: #dceeff; color: #1456a0; }",".miner-toggle-btn:not(.active) .miner-tool-check { visibility: hidden; }",".miner-tool-check { color: #16a34a; font-size: 14px; font-weight: 900; line-height: 1; width: 14px; text-align: center; flex-shrink: 0; }",".miner-tool-name { font-size: 12px; font-weight: 700; flex: 1; text-align: center; }",".miner-tool-icon-wrap { width: 26px; height: 26px; background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }",".miner-prio-icon { width: 20px; height: 20px; object-fit: contain; pointer-events: none; }",".miner-strat-item { display: flex; align-items: center; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; border: 4px solid #fff; }",".miner-strat-item:hover { background: #dbeeff; border: 4px solid #1456a0; }",".miner-strat-item.active { background: #cfe6ff; font-weight: 700; border: 2px solid rgba(20,86,160,.35);}",".miner-strat-name { font-size: 12px; font-weight: 700; color: #282828; }",".miner-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: #333; padding: 4px 6px; }",".miner-input-num { width: 65px; padding: 8px 5px; background: #ffffff; border: 1px solid rgba(20, 86, 160, 0.30); border-radius: 8px; color: #1456a0; font-weight: bold; text-align: center; font-size: 14px; font-family: Cairo, Tahoma, sans-serif; }",".miner-quick-nums { display: flex; gap: 4px; }",".miner-btn-num { background: #fff; border: 1px solid #1456a0; color: #1456a0; border-radius: 6px; padding: 8px 15px; cursor: pointer; font-weight: 700; font-size: 11px; font-family: Cairo, Tahoma, sans-serif; transition: all 0.15s; }",".miner-btn-num:hover { background: #1456a0; color: #fff; }",".miner-actions { display: flex; gap: 8px; margin: 4px; }",".miner-btn { flex: 1; padding: 9px 14px; border: none; border-radius: 20px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s, transform 0.1s; font-family: Cairo, Tahoma, sans-serif; }",".miner-btn-start { background: #1456a0; border: 1px solid #0b3d73; color: #fff; box-shadow: 0 4px 6px rgba(20, 86, 160, 0.20); }",".miner-btn-start:hover { background: #1d70c9; transform: translateY(-2px); }",".miner-btn-stop { background: #b91c1c; border: 1px solid #7f1d1d; color: #fff; box-shadow: 0 4px 6px rgba(185, 28, 28, 0.2); }",".miner-btn-stop:hover { background: #dc2626; transform: translateY(-2px); }"];function _0x3b4189(){const _0x14eb29=_0x474e02,_0x5322b7=_0x59724d;let _0x1f0c6d=document["getElementById"]("miner-auto-styles");!_0x1f0c6d&&(_0x1f0c6d=document['createElement']("style"),_0x1f0c6d['id']="miner-auto-styles",document["head"]["appendChild"](_0x1f0c6d)),_0x1f0c6d["textContent"]=_0x3d587d["join"]('\x0a');}const _0x1436f8={'key':"tools",'label':'معدات\x20التنقيب','ids':[0x363a4,0x363a5,0x363a6]},_0x806d3a={'key':"keys",'label':"مفاتيح الكهوف",'ids':[0x363b1,0x363b2,0x363b3]},_0x206c27={'key':'chests','label':"صناديق الكنوز",'ids':[0x363ae,0x363af,0x363b0]},_0x5b3bea={'key':'museum','label':'صناديق\x20الآثار','ids':[0x363b7,0x363b8,0x363b9,0x363ba,0x363bb,0x363bc]},_0x1074a5={'key':"oil",'label':"مستلزمات النفط",'ids':[0x363b6,0x363b5,0x363b4]},_0x1d529f=[_0x1436f8,_0x806d3a,_0x206c27,_0x5b3bea,_0x1074a5],_0xbf0609={'id':0x363a4,'cat':"tools",'defaultName':'معول'},_0xa682bc={'id':0x363a5,'cat':"tools",'defaultName':"متفجرات"},_0x3869cd={'id':0x363a6,'cat':"tools",'defaultName':'شحنة\x20TNT'},_0x447214={'id':0x363b1,'cat':"keys",'defaultName':"مفتاح معدني"},_0x3c46cd={'id':0x363b2,'cat':'keys','defaultName':"مفتاح فضّي"},_0x530c7a={'id':0x363b3,'cat':"keys",'defaultName':"مفتاح ذهبي اللون"},_0x3da8f1={'id':0x363ae,'cat':'chests','defaultName':"صندوق خشب"},_0x4b5468={'id':0x363af,'cat':"chests",'defaultName':"صندوق فضّي"},_0x424aa3={'id':0x363b0,'cat':"chests",'defaultName':"صندوق ذهبي اللون"},_0x95b2fa={'id':0x363b7,'cat':"museum",'defaultName':"صندوق آثار"},_0x27ffe3={'id':0x363b8,'cat':"museum",'defaultName':"صندوق آثار"},_0x56c94e={'id':0x363b9,'cat':'museum','defaultName':"صندوق آثار"},_0x5e3f53={'id':0x363ba,'cat':"museum",'defaultName':'صندوق\x20آثار'},_0x2c823c={'id':0x363bb,'cat':"museum",'defaultName':'صندوق\x20آثار'},_0x41b7b4={'id':0x363bc,'cat':"museum",'defaultName':"صندوق عينات"},_0x58851b={'id':0x363b6,'cat':"oil",'defaultName':"رمال نفطية"},_0x259634={'id':0x363b5,'cat':"oil",'defaultName':"خام زيتي صخري"},_0x501d94={'id':0x363b4,'cat':"oil",'defaultName':"خام النفط"},_0x379247=[_0xbf0609,_0xa682bc,_0x3869cd,_0x447214,_0x3c46cd,_0x530c7a,_0x3da8f1,_0x4b5468,_0x424aa3,_0x95b2fa,_0x27ffe3,_0x56c94e,_0x5e3f53,_0x2c823c,_0x41b7b4,_0x58851b,_0x259634,_0x501d94],_0x343b68={'key':"smart",'name':"🧠 تنقيب متوازن",'type':'floors'},_0x4312db={'key':'speed','name':"⚡ تنقيب اقتصادي",'type':"floors"},_0x15d5de={'key':"clear",'name':"💥 تنظيف المستوى بالكامل",'type':"floors"},_0x35ccbc={'key':"quota",'name':"🎯 حد استخدام الأدوات",'type':"quota"},_0x549b02=[_0x343b68,_0x4312db,_0x15d5de,_0x35ccbc];function _0x1fdf09(_0xf9fa89){const _0x3bf9e8=_0x474e02,_0x14a1d1=_0x59724d;if(!_0xf9fa89||!_0xf9fa89["item"]||_0xf9fa89["claimed"])return null;for(let _0x2530be of Object['keys'](_0xf9fa89["item"])){let _0xddb64e=Number(_0x2530be),_0x1fcabf=unsafeWindow['Config']?.["Store"]?.[_0x2530be],_0x570f6c=_0x1fcabf?.['type'],_0x2f1fa9=_0x4b2ce4["selectedGifts"]["has"](_0xddb64e)||_0x4b2ce4["selectedGifts"]["has"](_0x2530be)||_0x570f6c&&_0x4b2ce4["selectedGifts"]['has'](_0x570f6c);const _0x3e7cf5={'key':_0x2530be,'qty':_0xf9fa89["item"][_0x2530be],'name':_0x1fcabf?.["name"]||_0x2530be};if(_0x2f1fa9)return _0x3e7cf5;}return null;}function _0x2bf70c(_0xb2db0f,_0x47d675,_0x1c8839){const _0x43b768=_0x474e02;let _0x2add0f=_0xb2db0f["_items"][_0x47d675]?.[_0x1c8839];if(!_0x2add0f||_0x2add0f['btype']==='x'||!_0x2add0f["canDestroy"])return Infinity;if(_0x2add0f['isEmpty']||_0x2add0f['hp']<=0x0)return 0x0;return _0x2add0f['hp']||0x1;}function _0xd45f33(_0x28e476){const _0x30a8d5=_0x59724d,_0x552a9a=_0x474e02;let _0x1c7468=0x0;for(let _0x92ec59 of _0x28e476?.["_continuousPath"]||[]){let [_0x26b9eb]=_0x92ec59["split"]('*')['map'](Number);_0x26b9eb>_0x1c7468&&(_0x1c7468=_0x26b9eb);}return _0x1c7468;}function _0xc79a42(_0x495fff,_0x4ee66a){const _0x3c7652=_0x59724d,_0x488687=_0x474e02,_0x463f53={'length':0x7};let _0x187b87=Array["from"](_0x463f53,()=>Array(0x7)['fill'](Infinity));const _0x2bb5ac={'length':0x7};let _0x1f268c=Array["from"](_0x2bb5ac,()=>Array(0x7)["fill"](null)),_0x31594a=[];for(let _0x8aa304 of _0x495fff["_continuousPath"]||[]){let [_0x591bb0,_0x2c4cdf]=_0x8aa304['split']('*')["map"](Number);if(_0x591bb0>=0x0&&_0x591bb0<0x7&&_0x2c4cdf>=0x0&&_0x2c4cdf<0x7){_0x187b87[_0x591bb0][_0x2c4cdf]=0x0;const _0x167a4d={'r':_0x591bb0,'c':_0x2c4cdf,'d':0x0};_0x31594a["push"](_0x167a4d);}}let _0x4feace=_0x495fff["_entersInfo"]||_0x4ee66a?.["getCurrPort"]?.()||_0x4ee66a?.["_currPort"]||[];for(let _0x5b292f=0x0;_0x5b292f<0x7;_0x5b292f++){if(_0x4feace[_0x5b292f]==0x0){let _0xbef55a=_0x2bf70c(_0x495fff,0x0,_0x5b292f);if(_0xbef55a<_0x187b87[0x0][_0x5b292f]){_0x187b87[0x0][_0x5b292f]=_0xbef55a;const _0x162de7={'r':0x0,'c':_0x5b292f,'d':_0xbef55a};_0x31594a['push'](_0x162de7);}}}while(_0x31594a["length"]>0x0){_0x31594a["sort"]((_0xfcc0ff,_0x39041d)=>_0xfcc0ff['d']-_0x39041d['d']);let _0x25fa3a=_0x31594a["shift"]();if(_0x25fa3a['d']>_0x187b87[_0x25fa3a['r']][_0x25fa3a['c']])continue;const _0x462c61={'r':0x1,'c':0x0,'bias':0x0},_0x537df6={'r':0x0,'c':0x1,'bias':0.15},_0x32b7af={'r':0x0,'c':-0x1,'bias':0.15},_0x272133={'r':-0x1,'c':0x0,'bias':0.5},_0x52ff49=[_0x462c61,_0x537df6,_0x32b7af,_0x272133];for(let _0x26ab36 of _0x52ff49){let _0x130e02=_0x25fa3a['r']+_0x26ab36['r'],_0xa55046=_0x25fa3a['c']+_0x26ab36['c'];if(_0x130e02<0x0||_0x130e02>0x6||_0xa55046<0x0||_0xa55046>0x6)continue;let _0x41ec49=_0x2bf70c(_0x495fff,_0x130e02,_0xa55046);if(_0x41ec49===Infinity)continue;let _0x2c2921=_0x25fa3a['d']+_0x41ec49+_0x26ab36['bias'];if(_0x2c2921<_0x187b87[_0x130e02][_0xa55046]){_0x187b87[_0x130e02][_0xa55046]=_0x2c2921;const _0x2c9ddc={'r':_0x25fa3a['r'],'c':_0x25fa3a['c']};_0x1f268c[_0x130e02][_0xa55046]=_0x2c9ddc;const _0x5d2f57={'r':_0x130e02,'c':_0xa55046,'d':_0x2c2921};_0x31594a['push'](_0x5d2f57);}}}let _0x557f5f=null,_0x48d074=Infinity;for(let _0x3e99f0=0x6;_0x3e99f0>=0x0;_0x3e99f0--){for(let _0x36161a=0x0;_0x36161a<0x7;_0x36161a++){let _0x5001c3=_0x495fff['_items'][_0x3e99f0]?.[_0x36161a];if(_0x5001c3&&_0x187b87[_0x3e99f0][_0x36161a]<Infinity&&_0x1fdf09(_0x5001c3['info'])){if(_0x187b87[_0x3e99f0][_0x36161a]<_0x48d074){_0x48d074=_0x187b87[_0x3e99f0][_0x36161a];const _0x5df4c6={'r':_0x3e99f0,'c':_0x36161a};_0x557f5f=_0x5df4c6;}}}}if(!_0x557f5f)for(let _0x29a9f3=0x0;_0x29a9f3<0x7;_0x29a9f3++){if(_0x187b87[0x6][_0x29a9f3]<_0x48d074){_0x48d074=_0x187b87[0x6][_0x29a9f3];const _0xc91841={'r':0x6,'c':_0x29a9f3};_0x557f5f=_0xc91841;}}if(!_0x557f5f||_0x48d074===Infinity)for(let _0xdd524e=0x5;_0xdd524e>=0x0;_0xdd524e--){for(let _0xda98fe=0x0;_0xda98fe<0x7;_0xda98fe++){if(_0x187b87[_0xdd524e][_0xda98fe]<_0x48d074){_0x48d074=_0x187b87[_0xdd524e][_0xda98fe];const _0x2b1950={'r':_0xdd524e,'c':_0xda98fe};_0x557f5f=_0x2b1950;}}if(_0x557f5f&&_0x48d074<Infinity)break;}let _0x1e3c63=[],_0x5dc5b0=_0x557f5f;while(_0x5dc5b0){_0x1e3c63["unshift"](_0x5dc5b0),_0x5dc5b0=_0x1f268c[_0x5dc5b0['r']]?.[_0x5dc5b0['c']];}const _0x5d3427={'path':_0x1e3c63,'goal':_0x557f5f};return _0x5d3427;}function _0x322b1c(_0x59b1a0,_0x14157f){const _0x14df71=_0x474e02,_0x221171=_0x59724d;let _0x5d4bdf=_0x59b1a0['_items'][_0x14157f];if(!_0x5d4bdf)return null;let _0x2f4227=[],_0x379b54=0x0,_0x42ea28=0x0;for(let _0x23e0b7=0x0;_0x23e0b7<0x7;_0x23e0b7++){let _0x36567f=_0x5d4bdf[_0x23e0b7];if(!_0x36567f)continue;if(_0x36567f["isEmpty"]||_0x36567f['hp']<=0x0)_0x36567f['canShow']&&_0x2f4227['push'](_0x23e0b7);else{if(_0x36567f["canDestroy"]){let _0x3de2d0=_0x36567f['hp']||0x1;_0x379b54+=_0x3de2d0,_0x3de2d0>=0x2&&_0x42ea28++;}}}if(_0x379b54===0x0||_0x379b54>0x8||_0x42ea28>0x2)return null;if(_0x2f4227["length"]===0x0&&_0x379b54===0x7&&_0x42ea28===0x0){let _0x5650d5=0x3;for(let _0xb469de of[0x3,0x2,0x4,0x1,0x5,0x0,0x6]){let _0x407213=_0x5d4bdf[_0xb469de];if(_0x407213&&_0x407213['canShow']&&_0x407213["canDestroy"]&&!_0x407213["isEmpty"]){_0x5650d5=_0xb469de;break;}}const _0x5e27d1={'action':"pickaxe_open",'r':_0x14157f,'c':_0x5650d5};return _0x5e27d1;}if(_0x2f4227["length"]>0x0){let _0x5e27e6=-0x1,_0x3fb58d=0x0;for(let _0x52cdd2 of _0x2f4227){let _0x463236=0x0,_0x3ffcd3=![];for(let _0x2709a4=_0x52cdd2+0x1;_0x2709a4<0x7;_0x2709a4++){let _0xb1b7cb=_0x5d4bdf[_0x2709a4];if(!_0xb1b7cb||!_0xb1b7cb["canDestroy"]||_0xb1b7cb["btype"]==='x')break;if(!_0xb1b7cb["isEmpty"]&&_0xb1b7cb['hp']>0x0){_0x463236++;_0x1fdf09(_0xb1b7cb['info'])&&(_0x3ffcd3=!![]);if(_0xb1b7cb['hp']>0x1)break;}}for(let _0x31eee6=_0x52cdd2-0x1;_0x31eee6>=0x0;_0x31eee6--){let _0x5ec2e2=_0x5d4bdf[_0x31eee6];if(!_0x5ec2e2||!_0x5ec2e2['canDestroy']||_0x5ec2e2["btype"]==='x')break;if(!_0x5ec2e2["isEmpty"]&&_0x5ec2e2['hp']>0x0){_0x463236++;_0x1fdf09(_0x5ec2e2["info"])&&(_0x3ffcd3=!![]);if(_0x5ec2e2['hp']>0x1)break;}}let _0x559dba=(_0x3ffcd3?0x64:0x0)+_0x463236;(_0x3ffcd3||_0x463236>=0x2)&&_0x559dba>_0x3fb58d&&(_0x3fb58d=_0x559dba,_0x5e27e6=_0x52cdd2);}if(_0x5e27e6!==-0x1){const _0x7b7683={'action':"explosive",'r':_0x14157f,'c':_0x5e27e6};return _0x7b7683;}}return null;}function _0x549e9b(_0x37a1bc,_0x357d6f=![],_0x79a3c=0x0){const _0x4531f3=_0x59724d,_0xe1bd1b=_0x474e02;let _0x4d3ac5=null,_0xbe1d72=-0x1,_0x2ab841=_0x357d6f?0x1:Math["max"](0x1,_0x79a3c);for(let _0x38afa9=_0x2ab841;_0x38afa9<0x6;_0x38afa9++){for(let _0x1633a9=0x1;_0x1633a9<0x6;_0x1633a9++){let _0x1f04f1=_0x37a1bc["_items"][_0x38afa9]?.[_0x1633a9];if(!_0x1f04f1||!_0x1f04f1["canShow"]||!_0x1f04f1["isEmpty"])continue;let _0x2375a7=_0x37a1bc["_items"][_0x38afa9-0x1]?.[_0x1633a9],_0x4e9aa2=_0x37a1bc['_items'][_0x38afa9+0x1]?.[_0x1633a9],_0x3ccc64=_0x2375a7&&_0x2375a7['isEmpty']||_0x4e9aa2&&_0x4e9aa2['isEmpty'],_0x36a72a=0x0,_0x1a43e4=0x0,_0x19cee5=![];for(let _0x4329c4=_0x38afa9-0x1;_0x4329c4<=_0x38afa9+0x1;_0x4329c4++){for(let _0x313e0e=_0x1633a9-0x1;_0x313e0e<=_0x1633a9+0x1;_0x313e0e++){let _0x91c689=_0x37a1bc["_items"][_0x4329c4]?.[_0x313e0e];if(_0x91c689&&_0x91c689["btype"]==='x'){_0x19cee5=!![];break;}_0x91c689&&!_0x91c689["isEmpty"]&&_0x91c689["canDestroy"]&&_0x91c689['hp']>0x0&&(_0x36a72a+=_0x91c689['hp'],_0x1a43e4++);}if(_0x19cee5)break;}if(!_0x19cee5&&(_0x357d6f||_0x3ccc64)&&_0x1a43e4>=0x2&&_0x36a72a<0x7){let _0x49c22c=_0x38afa9*0x3e8+_0x1a43e4*0x64;if(_0x49c22c>_0xbe1d72){_0xbe1d72=_0x49c22c;const _0x26e474={'r':_0x38afa9,'c':_0x1633a9};_0x4d3ac5=_0x26e474;}}}}return _0x4d3ac5;}function _0x524d7a(_0x462415,_0x2a4f20){const _0x1e5eee=_0x474e02,_0x2ba71f=_0x59724d;if(!_0x462415?.["_items"])return null;let _0x32b237=unsafeWindow['GF']?.["loginModel"],_0x326a5b=_0x32b237?.["get_gifts_num_by_id"]?.(0x363a4)||0x0,_0x440867=_0x32b237?.["get_gifts_num_by_id"]?.(0x363a5)||0x0,_0x58d806=_0x32b237?.["get_gifts_num_by_id"]?.(0x363a6)||0x0;if(_0x326a5b<=0x0&&_0x440867<=0x0&&_0x58d806<=0x0)return null;let _0xa90b14=_0xd45f33(_0x462415);if(_0x4b2ce4["tools"]["pickaxe"]&&_0x326a5b>0x0)for(let _0x4f2ee4=0x6;_0x4f2ee4>=0x0;_0x4f2ee4--){for(let _0x20770e=0x0;_0x20770e<0x7;_0x20770e++){let _0x462268=_0x462415["_items"][_0x4f2ee4]?.[_0x20770e];if(_0x462268&&_0x462268["canShow"]&&!_0x462268["isEmpty"]&&_0x462268['canDestroy']&&_0x462268['hp']>0x0&&_0x1fdf09(_0x462268['info'])){_0x462268["canShow"]=!![];const _0x3623b7={'toolIdx':0x1,'r':_0x4f2ee4,'c':_0x20770e};return _0x3623b7;}}}if(_0x4b2ce4["tools"]["tnt"]&&_0x58d806>0x0){let _0x2fb446=_0x549e9b(_0x462415,![],_0xa90b14);if(_0x2fb446)return{'toolIdx':0x3,'r':_0x2fb446['r'],'c':_0x2fb446['c']};}if(_0x4b2ce4["tools"]["explosive"]&&_0x440867>0x0)for(let _0x4f0ebb=0x6;_0x4f0ebb>=_0xa90b14;_0x4f0ebb--){let _0x1207c4=_0x322b1c(_0x462415,_0x4f0ebb);if(_0x1207c4){if(_0x1207c4['action']==="pickaxe_open"&&_0x4b2ce4["tools"]["pickaxe"]&&_0x326a5b>0x0){let _0x2a256c=_0x462415["_items"][_0x1207c4['r']]?.[_0x1207c4['c']];_0x2a256c&&(_0x2a256c["canShow"]=!![]);const _0x56ed9f={'toolIdx':0x1,'r':_0x1207c4['r'],'c':_0x1207c4['c']};return _0x56ed9f;}if(_0x1207c4["action"]==='explosive'){const _0x1e6f3d={'toolIdx':0x2,'r':_0x1207c4['r'],'c':_0x1207c4['c']};return _0x1e6f3d;}}}let {path:_0x506543}=_0xc79a42(_0x462415,_0x2a4f20,![]);for(let _0x6805eb of _0x506543){let _0x4fdf9f=_0x462415["_items"][_0x6805eb['r']]?.[_0x6805eb['c']];if(_0x4fdf9f&&!_0x4fdf9f['isEmpty']&&_0x4fdf9f['hp']>0x0&&_0x4fdf9f["canDestroy"]){if(_0x4fdf9f['hp']>=0x2&&_0x4b2ce4["tools"]["tnt"]&&_0x58d806>0x0)for(let _0x2776ac=_0x6805eb['r']-0x1;_0x2776ac<=_0x6805eb['r']+0x1;_0x2776ac++){for(let _0x1da6ce=_0x6805eb['c']-0x1;_0x1da6ce<=_0x6805eb['c']+0x1;_0x1da6ce++){if(_0x2776ac>=0x0&&_0x2776ac<0x7&&_0x1da6ce>=0x0&&_0x1da6ce<0x7){let _0x2477af=_0x462415["_items"][_0x2776ac]?.[_0x1da6ce];if(_0x2477af&&_0x2477af['canShow']&&_0x2477af["isEmpty"]){const _0x1e4ca9={'toolIdx':0x3,'r':_0x2776ac,'c':_0x1da6ce};return _0x1e4ca9;}}}}if(_0x4b2ce4["tools"]['pickaxe']&&_0x326a5b>0x0){_0x4fdf9f['canShow']=!![];const _0x430b97={'toolIdx':0x1,'r':_0x6805eb['r'],'c':_0x6805eb['c']};return _0x430b97;}else{if(_0x4b2ce4["tools"]['tnt']&&_0x58d806>0x0)for(let _0x19bffa=_0x6805eb['r']-0x1;_0x19bffa<=_0x6805eb['r']+0x1;_0x19bffa++){for(let _0x33ebed=_0x6805eb['c']-0x1;_0x33ebed<=_0x6805eb['c']+0x1;_0x33ebed++){if(_0x19bffa>=0x0&&_0x19bffa<0x7&&_0x33ebed>=0x0&&_0x33ebed<0x7){let _0x2566e3=_0x462415['_items'][_0x19bffa]?.[_0x33ebed];if(_0x2566e3&&_0x2566e3["canShow"]&&_0x2566e3["isEmpty"]){const _0x1cad95={'toolIdx':0x3,'r':_0x19bffa,'c':_0x33ebed};return _0x1cad95;}}}}}}}for(let _0x224a93=0x6;_0x224a93>=_0xa90b14;_0x224a93--){for(let _0x5dbe97=0x0;_0x5dbe97<0x7;_0x5dbe97++){let _0x43da65=_0x462415["_items"][_0x224a93]?.[_0x5dbe97];if(_0x43da65&&_0x43da65["canShow"]&&!_0x43da65['isEmpty']&&_0x43da65["canDestroy"]&&_0x43da65['hp']>0x0){if(_0x4b2ce4["tools"]["pickaxe"]&&_0x326a5b>0x0){const _0x549083={'toolIdx':0x1,'r':_0x224a93,'c':_0x5dbe97};return _0x549083;}}}}return null;}function _0x4476e7(_0x566801,_0x415646){const _0x43eaaf=_0x59724d,_0x252835=_0x474e02;if(!_0x566801||_0x415646<0x1||_0x415646>0x3)return;(_0x566801["_currMiningTools"]!==_0x415646||!_0x566801["_curToolMc"])&&(_0x566801['resetTool']?.(),_0x566801["_currMiningTools"]=_0x415646,_0x415646===0x1&&_0x566801["gao"]?_0x566801["gao"]['visible']=![]:_0x415646===0x2&&_0x566801['pao']?_0x566801["pao"]["visible"]=![]:_0x415646===0x3&&_0x566801["tnt"]&&(_0x566801["tnt"]["visible"]=![]),_0x566801["setGestureView"]?.());}function _0x42ff91(_0x118e80,_0x4c00e5){const _0x23b7a1=_0x474e02,_0x4886e0=_0x59724d;if(!_0x118e80?.["_items"])return;for(let _0x8fd72d=0x0;_0x8fd72d<0x7;_0x8fd72d++){for(let _0x4d4b5e=0x0;_0x4d4b5e<0x7;_0x4d4b5e++){let _0x3da92e=_0x118e80["_items"][_0x8fd72d]?.[_0x4d4b5e];if(_0x3da92e&&_0x3da92e["isEmpty"]&&_0x3da92e["canShow"]&&_0x3da92e["info"]&&!_0x3da92e["info"]["claimed"]&&_0x3da92e['info']["item"]){const _0x1f7eb3={'mx':_0x3da92e['row'],'my':_0x3da92e["col"]};_0x4c00e5['claimReward']?.([_0x1f7eb3]),_0x3da92e['info']['claimed']=0x1;}}}}async function _0x1a23ba(){const _0x1eb33c=_0x474e02,_0x5ae1fb=_0x59724d;let _0x3c8d8e=unsafeWindow['GF'],_0x5796d6=_0x3c8d8e?.["digMiningController"],_0x1c7424=_0x3c8d8e?.["digMiningModel"],_0x2008d7=_0x5796d6?.["mainView"];if(!_0x1c7424){_0x47cc0a("⚠️ بيانات المنجم غير متاحة حالياً، افتح المنجم أولاً!",'error'),_0x5c99ae();return;}(!_0x2008d7||!_0x2008d7["visible"])&&(_0x5796d6?.["onMainOpen"]?.(),await _0xd9cf81(0x258),_0x2008d7=_0x5796d6?.['mainView']);let _0x2d176a=await unsafeWindow["NetUtils"]?.["request"]('Mine/Load',{});_0x2d176a&&_0x1c7424["mineDataReady"](_0x2d176a);if(_0x2008d7&&_0x2008d7["container"]){unsafeWindow["egret"]?.["Tween"]["removeTweens"](_0x2008d7["container"]),unsafeWindow['egret']?.["Tween"]["removeTweens"](_0x2008d7["bgcontainer"]),_0x2008d7["_toolBusy"]=![],_0x2008d7["_isTween"]=![],_0x2008d7["_paoExplodeing"]=![],_0x2008d7['container']["removeChildren"](),_0x2008d7["container"]['y']=0x0,_0x2008d7["init"]();while(_0x2008d7['_isTween']){await _0xd9cf81(0x64);}}_0x4b2ce4["startDepth"]=_0x1c7424["getCurrDepth"]?.()||0x0,_0x4b2ce4["floorsDone"]=0x0,_0x4b2ce4["quotaUsed"]=0x0,_0x3589fa(),_0x47cc0a("بدأ عمل مرشد التنقيب ⛏️","info");const _0x384316=[0x363a4,0x363a5,0x363a6]['reduce']((_0x27c6ba,_0x3437eb)=>_0x27c6ba+(Number(_0x3c8d8e?.['loginModel']?.["get_gifts_num_by_id"]?.(_0x3437eb))||0x0),0x0);while(_0x4b2ce4['isRunning']){let _0xa845dd=_0x1c7424['getCurrDepth']?.()||0x0;_0x4b2ce4['floorsDone']=Math["max"](0x0,_0xa845dd-_0x4b2ce4['startDepth']),_0x3589fa();const _0x2eb491=[0x363a4,0x363a5,0x363a6]["reduce"]((_0x43159a,_0x27bc57)=>_0x43159a+(Number(_0x3c8d8e?.["loginModel"]?.["get_gifts_num_by_id"]?.(_0x27bc57))||0x0),0x0);_0x4b2ce4["quotaUsed"]=Math['max'](0x0,_0x384316-_0x2eb491);if(_0x4b2ce4["currentStrategy"]==="quota"&&_0x4b2ce4['targetQuota']>0x0&&_0x4b2ce4["quotaUsed"]>=_0x4b2ce4["targetQuota"]){_0x47cc0a("🎉 تم الوصول إلى كمية الأدوات المحددة!","success");break;}if(_0x4b2ce4["currentStrategy"]!=="quota"&&_0x4b2ce4["targetFloors"]>0x0&&_0xa845dd-_0x4b2ce4['startDepth']>=_0x4b2ce4["targetFloors"]){_0x47cc0a("🎉 تم إنجاز "+_0x4b2ce4["targetFloors"]+" طابق بنجاح!","success");break;}if(_0x1c7424["_mapList"]&&_0x1c7424["_mapList"]["length"]<=0xe&&!_0x1c7424["_reFetchMineData"]){_0x1c7424["_reFetchMineData"]=!![];let _0x29da0f=await unsafeWindow["NetUtils"]?.["request"]("Mine/Load",{});_0x29da0f&&_0x1c7424["reFetchDataReady"](_0x29da0f);}_0x42ff91(_0x2008d7,_0x1c7424);let _0x727596=_0x524d7a(_0x2008d7,_0x1c7424);if(!_0x727596){let _0x108aa6=_0x3c8d8e?.["loginModel"]?.["get_gifts_num_by_id"]?.(0x363a4)||0x0,_0x258da3=_0x3c8d8e?.["loginModel"]?.["get_gifts_num_by_id"]?.(0x363a5)||0x0,_0xdb8df=_0x3c8d8e?.["loginModel"]?.["get_gifts_num_by_id"]?.(0x363a6)||0x0;_0x108aa6<=0x0&&_0x258da3<=0x0&&_0xdb8df<=0x0?_0x47cc0a("نفدت جميع معدات التنقيب وعبوات التفجير 🚫",'warning'):_0x47cc0a("لا توجد كتل أو مسارات متاحة!","warning");break;}_0x4476e7(_0x2008d7,_0x727596["toolIdx"]),_0x2008d7["_overRow"]=_0x727596['r'],_0x2008d7["_overCol"]=_0x727596['c'];_0x2008d7["_curToolMc"]&&(_0x2008d7["_curToolMc"]['x']=_0x2008d7["base"]['x']+_0x727596['c']*_0x2008d7["GRID_W"]+0x14,_0x2008d7['_curToolMc']['y']=_0x2008d7['base']['y']+_0x727596['r']*_0x2008d7["GRID_H"]+0x14);_0x2008d7["showMTArea"]();if(_0x2008d7["_affectItems"]&&_0x2008d7["_affectItems"]["length"]>0x0){if(!_0x1c7424["checkUseMiningTool"](_0x2008d7["_currMiningTools"])){_0x47cc0a("نفدت الأداة المحددة!","warning");break;}_0x2008d7["_toolBusy"]=!![],_0x2008d7["setTools"]();let _0x22d678=[],_0x22ccfd=[];for(let _0x45fb7a of _0x2008d7['_affectItems']){const _0x32e083={'mx':_0x45fb7a["row"],'my':_0x45fb7a["col"]};_0x22d678["push"](_0x32e083),_0x45fb7a["hitBlock"](_0x2008d7["_currMiningTools"]);if(_0x45fb7a["isEmpty"]){const _0x51e158={'mx':_0x45fb7a['row'],'my':_0x45fb7a['col']};_0x22ccfd["push"](_0x51e158);const _0x59a800={'id':_0x45fb7a["btype"]};_0x3c8d8e?.['taskModel']?.['addSubTask']?.(_0x59a800,"Mine_Mine");}}_0x1c7424["clearGridByTools"](_0x2008d7["_overRow"],_0x2008d7["_overCol"],_0x2008d7["_currMiningTools"],_0x22d678),_0x22ccfd["length"]>0x0&&_0x1c7424['claimReward'](_0x22ccfd),_0x2008d7["showToolEffect"]();}let _0x560383=Date["now"]();while(Date['now']()-_0x560383<0x3a98){if(_0x2008d7["_toolBusy"]||_0x2008d7["_isTween"]||_0x2008d7["_paoExplodeing"])await _0xd9cf81(0x64);else{await _0xd9cf81(0x96);if(!_0x2008d7["_toolBusy"]&&!_0x2008d7["_isTween"]&&!_0x2008d7["_paoExplodeing"])break;}}Date['now']()-_0x560383>=0x3a98&&(_0x2008d7["_toolBusy"]=![],_0x2008d7["_isTween"]=![],_0x2008d7["_paoExplodeing"]=![]),await _0xd9cf81(0xfa);}_0x2008d7["clearTools"]?.(),_0x2008d7['setTools']?.(),_0x2008d7['setDepth']?.(),_0x5c99ae();}function _0x3d6f6b(){const _0x5c1465=_0x59724d,_0x5b39cf=_0x474e02;if(_0x4b2ce4["isRunning"])return;_0x4b2ce4["isRunning"]=!![],_0x3589fa(),_0x1a23ba()["catch"](_0x5adaaa=>{const _0x402b93=_0x5b39cf;_0x5c99ae(),_0x47cc0a("حدث خطأ أثناء الحفر",'error');});}function _0x5c99ae(){const _0x5c878e=_0x474e02,_0x100f6c=_0x59724d;_0x4b2ce4["isRunning"]=![],_0x3589fa(),_0x47cc0a("تم الإيقاف ⏹️","warning");}let _0x426066=null;function _0x4c6d3a(_0x42081e,_0x438b30){const _0x480ca6=_0x474e02,_0x219e86=_0x59724d;let _0x22366f=0x0,_0x4006de=0x0,_0x5cf8a3=0x0,_0x898a4d=0x0;function _0x42f7b9(_0x16fd37){const _0x503190=_0x48b7,_0x464e3a=_0x4e21;if(_0x16fd37['target']['closest']('button')||_0x16fd37["target"]['closest']("input"))return;_0x22366f=_0x16fd37['clientX'],_0x4006de=_0x16fd37["clientY"];const _0x84e3b4=_0x42081e["getBoundingClientRect"]();_0x5cf8a3=_0x84e3b4["left"],_0x898a4d=_0x84e3b4["top"];function _0x4847e8(_0x14c238){const _0x57e256=_0x503190,_0xf71e3e=_0x464e3a;_0x42081e['style']['left']=Math['max'](0x0,Math["min"](window["innerWidth"]-_0x42081e["offsetWidth"],_0x5cf8a3+(_0x14c238["clientX"]-_0x22366f)))+'px',_0x42081e['style']["top"]=Math["max"](0x0,Math["min"](window["innerHeight"]-_0x42081e["offsetHeight"],_0x898a4d+(_0x14c238['clientY']-_0x4006de)))+'px';}function _0x4b7e5a(){const _0x1ce728=_0x464e3a,_0x38f930=_0x503190;document["removeEventListener"]("pointermove",_0x4847e8),document["removeEventListener"]("pointerup",_0x4b7e5a),document["removeEventListener"]("pointercancel",_0x4b7e5a);}document["addEventListener"]('pointermove',_0x4847e8),document["addEventListener"]('pointerup',_0x4b7e5a),document["addEventListener"]('pointercancel',_0x4b7e5a);}_0x438b30["addEventListener"]("pointerdown",_0x42f7b9),document["getElementById"]("miner-auto-header")["addEventListener"]("pointerdown",_0x42f7b9);}function _0x5aa1fe(){const _0x23508b=_0x59724d,_0x596ad2=_0x474e02;if(_0x426066)return;_0x3b4189(),_0x426066=document['createElement']("div"),_0x426066['id']="miner-auto-panel",_0x426066["style"]["display"]="none";let _0x358d6d=_0x379247["map"](_0xc81538=>{const _0x5c4dc6=_0x596ad2,_0x2d4917=_0x23508b,_0x1b7822=_0x4b2ce4["selectedGifts"]["has"](_0xc81538['id'])?"active":'',_0x2a6fb6='',_0x48e8bb=unsafeWindow["Config"]?.['Store_GetName']?.(_0xc81538['id'])||_0xc81538["defaultName"]||_0xc81538['id'];return "\n                    <div class=\"miner-item-chip "+_0x1b7822+"\" data-id=\""+_0xc81538['id']+"\" title=\""+_0x48e8bb+("\">\n                        <img class=\"miner-preview-icon\" src=\"")+_0x2a6fb6+("\" />\n                        <span class=\"miner-check-mark\">✓</span>\n                    </div>\n                ");})["join"](''),_0x818f7b=_0x1d529f['map'](_0x55301c=>{const _0x5b11c1=_0x23508b,_0x5efb76=_0x596ad2,_0x3b4dc8=_0x55301c["ids"]['every'](_0x51d70f=>_0x4b2ce4["selectedGifts"]["has"](_0x51d70f));return "\n                    <label class=\"miner-preset-item\">\n                        <input type=\"checkbox\" data-cat=\""+_0x55301c['key']+'\x22\x20'+(_0x3b4dc8?"checked":'')+(" />\n                        <span>")+_0x55301c["label"]+("</span>\n                    </label>\n                ");})["join"]('')+("\n                <div style=\"border-top:1px dashed #d1d5db; margin:2px 0;\"></div>\n                <label class=\"miner-preset-item\">\n                    <input type=\"checkbox\" data-act=\"all\" />\n                    <span>اختيار الجميع</span>\n                </label>\n                <label class=\"miner-preset-item\">\n                    <input type=\"checkbox\" data-act=\"none\" />\n                    <span>مسح الاختيار</span>\n                </label>\n            "),_0x4ee0a3=_0x549b02["map"](_0x1289b3=>{const _0xef662b=_0x596ad2,_0x142c23=_0x23508b,_0x5d703f="smart"===_0x1289b3["key"]?"active":'';return "\n                    <div class=\"miner-strat-item "+_0x5d703f+("\" data-strat=\"")+_0x1289b3["key"]+("\">\n                        <span class=\"miner-strat-name\">")+_0x1289b3['name']+("</span>\n                    </div>\n                ");})["join"]('');_0x426066["innerHTML"]="\n                <div id=\"miner-auto-header\">\n                    <span class=\"miner-title\">⛏️ مرشد التنقيب</span>\n                    <div class=\"miner-header-actions\">\n                        <span id=\"miner-auto-drag\" title=\"اسحب لنقل اللوحة\">∷ نقل</span>\n                        <button id=\"miner-auto-close\" title=\"إخفاء\">✕</button>\n                    </div>\n                </div>\n\n                <div id=\"miner-auto-body\">\n                    <div class=\"miner-status\">\n                        <span id=\"miner-lbl-depth\">المستوى: --</span>\n                        <span id=\"miner-lbl-pick\">⛏️ --</span>\n                        <span id=\"miner-lbl-exp\">🧨 --</span>\n                        <span id=\"miner-lbl-tnt\">💣 --</span>\n                    </div>\n\n                    <div class=\"miner-box\">\n                        <div class=\"miner-box-title\">\n                            <span>🎁 المكافآت التي تبحث عنها</span>\n                        </div>\n\n                        <div class=\"miner-d"+("ropdown-wrap\">\n                            <div id=\"miner-dropdown-toggle\" class=\"miner-dropdown-toggle\" title=\"اضغط لاختيار المجموعات\">\n                                <span id=\"miner-dropdown-title\">قائمة المكافآت  : ")+_0x4b2ce4["selectedGifts"]["size"]+(" </span>\n                                <span id=\"miner-dropdown-arrow\" class=\"miner-dropdown-arrow\">▼</span>\n                            </div>\n                            <div id=\"miner-dropdown-menu\" class=\"miner-dropdown-menu\">\n                                ")+_0x818f7b+("\n                            </div>\n                        </div>\n\n                        <div class=\"miner-items-container\">\n                            ")+_0x358d6d+("\n                        </div>\n\n                        <div id=\"miner-hidden-toggle\" class=\"miner-hidden-badge\" >\n                            <span>⛏️ إظهار الكنوز المخفية</span>\n                            <span id=\"miner-hidden-status\" style=\"font-weight:700;\">")+"✓ مفعل"+("</span>\n                        </div>\n                    </div>\n\n                    <div class=\"miner-box\">\n                        <div class=\"miner-box-title\">\n                            <span>⚡ خطة التنقيب</span>\n                        </div>\n\n                        <div class=\"miner-dropdown-wrap\">\n                            <div id=\"miner-strat-toggle\" class=\"miner-dropdown-toggle\" title=\"انقر لاختيار خطة التنقيب\">\n                                <span id=\"miner-strat-title\">")+(_0x549b02['find'](_0x23b152=>_0x23b152["key"]==="smart")?.["name"]||'🧠\x20تنقيب\x20متواز'+'ن')+("</span>\n                                <span id=\"miner-strat-arrow\" class=\"miner-dropdown-arrow\">▼</span>\n                            </div>\n                            <div id=\"miner-strat-menu\" class=\"miner-dropdown-menu\">\n                                ")+_0x4ee0a3+("\n                            </div>\n                        </div>\n\n                        <div id=\"miner-tools-grid\" class=\"miner-tools-grid\">\n                            <button class=\"miner-toggle-btn ")+(_0x4b2ce4['tools']["pickaxe"]?"active":'')+("\" data-tool=\"pickaxe\">\n                                <div class=\"miner-tool-icon-wrap\">\n                                    <img class=\"miner-prio-icon\" src=\"")+_0x357dbe(0x363a4)+("\" />\n                                </div>\n                                <span class=\"miner-tool-name\">الفأس</span>\n                                <span class=\"miner-tool-check\">✓</span>\n                            </button>\n                            <button class=\"miner-toggle-btn ")+(_0x4b2ce4["tools"]["explosive"]?'active':'')+("\" data-tool=\"explosive\">\n                                <div class=\"miner-tool-icon-wrap\">\n                                    <img class=\"miner-prio-icon\" src=\"")+_0x357dbe(0x363a5)+("\" />\n                                </div>\n                                <span class=\"miner-tool-name\">عبوات التفجير</span>\n                                <span class=\"miner-tool-check\">✓</span>\n                            </button>\n                            <button class=\"miner-toggle-btn ")+(_0x4b2ce4["tools"]["tnt"]?"active":'')+("\" data-tool=\"tnt\">\n                                <div class=\"miner-tool-icon-wrap\">\n                                    <img class=\"miner-prio-icon\" src=\"")+_0x357dbe(0x363a6)+("\" />\n                                </div>\n                                <span class=\"miner-tool-name\">شحنة TNT</span>\n                                <span class=\"miner-tool-check\">✓</span>\n                            </button>\n                        </div>\n                    </div>\n\n                    <div class=\"miner-row\">\n                        <span id=\"miner-lbl-target\">")+"عدد الطوابق :"+("</span>\n                        <div style=\"display:flex; align-items:center; gap:6px;\">\n                            <input id=\"miner-input-target\" class=\"miner-input-num\" type=\"number\" min=\"0\" max=\"1000\" value=\"")+0x14+("\" />\n                            <div id=\"miner-quick-btns\" class=\"miner-quick-nums\"></div>\n                        </div>\n                    </div>\n\n                    <div class=\"miner-actions\">\n                        <button id=\"miner-btn-toggle\" class=\"miner-btn miner-btn-start\">▶ ابدأ التنقيب</button>\n                    </div>\n                </div>\n            "),document["body"]["appendChild"](_0x426066),_0x426066["querySelectorAll"](".miner-item-chip")["forEach"](_0x192a7d=>{const _0x29f5a9=_0x23508b,_0x2e7580=_0x596ad2,_0x39c6f7=_0x192a7d['querySelector']("img");if(_0x39c6f7)_0x39c6f7['setAttribute']("data-item-id",_0x192a7d["getAttribute"]('data-id'));}),_0x426066["querySelectorAll"](".miner-toggle-btn")["forEach"](_0x5f66f7=>{const _0x298152=_0x596ad2,_0x9dfd47=_0x23508b,_0x43c33=_0x5f66f7["querySelector"]('img'),_0x222422=_0x5f66f7["getAttribute"]("data-tool");if(_0x43c33)_0x43c33['setAttribute']("data-item-id",_0x222422==="pickaxe"?'222116':_0x222422==="explosive"?'222117':"222118");}),_0x426066["querySelectorAll"]("img[data-item-id]")["forEach"](_0x1a4e87=>{const _0x316255=_0x23508b,_0x358a33=_0x596ad2,_0x6c6c0a=_0x1a4e87["getAttribute"]('data-item-id');let _0x43660b=[],_0x23876e=0x0,_0x142708=[];const _0x363baa=()=>{const _0x1c407e=_0x358a33,_0x323eff=_0x48b7,_0x533d7d=[],_0x2ffb83=_0x1c9525(Number(_0x6c6c0a));if(_0x2ffb83&&/^https?:\/\//i["test"](_0x2ffb83))_0x533d7d["push"](_0x2ffb83);return _0x5a5dd4(Number(_0x6c6c0a))["forEach"](_0xe9b98e=>{const _0x3ecd63=_0x323eff,_0x118d43=_0x1c407e;if(_0xe9b98e&&/^https?:\/\//i["test"](_0xe9b98e)&&!_0x533d7d["includes"](_0xe9b98e))_0x533d7d["push"](_0xe9b98e);}),_0x533d7d['filter'](_0x2ec84e=>!_0x43660b["includes"](_0x2ec84e));},_0x32f737=()=>{const _0x4d97b7=_0x358a33,_0x7c6b25=_0x48b7;_0x142708=_0x363baa();if(_0x142708['length']){const _0x19bb2a=_0x142708["shift"]();_0x43660b['push'](_0x19bb2a),_0x1a4e87["src"]=_0x19bb2a;return;}_0x23876e++<0xc&&setTimeout(()=>{_0x43660b=[],_0x32f737();},0x3e8);};_0x1a4e87["loading"]="eager",_0x1a4e87["decoding"]="async",_0x1a4e87["onerror"]=_0x32f737,_0x1a4e87["onload"]=()=>{const _0x613e51=_0x358a33,_0x2a1f23=_0x316255;_0x1a4e87["style"]["visibility"]="visible";},_0x1a4e87["style"]["visibility"]="visible",_0x32f737();}),_0x4c6d3a(_0x426066,document["getElementById"]("miner-auto-drag")),document["getElementById"]("miner-auto-close")["onclick"]=_0x2df847,document["getElementById"]("miner-btn-toggle")["onclick"]=()=>_0x4b2ce4["isRunning"]?_0x5c99ae():_0x3d6f6b(),_0x426066["querySelectorAll"](".miner-item-chip")["forEach"](_0x4ef44c=>{const _0x45b50a=_0x596ad2;_0x4ef44c["onclick"]=()=>{const _0x4f1e09=_0x48b7,_0x5ea222=_0x45b50a;let _0x15bdba=_0x4ef44c['getAttribute']("data-id"),_0x39c76d=Number(_0x15bdba),_0x10634b=isNaN(_0x39c76d)?_0x15bdba:_0x39c76d;_0x4ef44c["classList"]["toggle"]("active"),_0x4ef44c["classList"]['contains']("active")?_0x4b2ce4["selectedGifts"]["add"](_0x10634b):_0x4b2ce4["selectedGifts"]['delete'](_0x10634b),_0x432815();};});const _0x4e10df=document["getElementById"]("miner-dropdown-toggle"),_0x4224fe=document["getElementById"]("miner-dropdown-menu"),_0x201d39=document["getElementById"]("miner-dropdown-arrow");_0x4e10df["onclick"]=_0x380339=>{const _0x5665ad=_0x23508b,_0x55ee27=_0x596ad2;_0x380339["stopPropagation"](),_0x21502a["classList"]["remove"]("open"),_0x340ce1["classList"]['remove']("open");const _0x4d63af=_0x4224fe["classList"]["toggle"]("open");_0x201d39["classList"]["toggle"]("open",_0x4d63af);};const _0x26bc53=document["getElementById"]("miner-strat-toggle"),_0x21502a=document["getElementById"]("miner-strat-menu"),_0x340ce1=document["getElementById"]("miner-strat-arrow");_0x26bc53['onclick']=_0x393edb=>{const _0xff3bc3=_0x23508b,_0x486df0=_0x596ad2;_0x393edb["stopPropagation"](),_0x4224fe['classList']["remove"]("open"),_0x201d39["classList"]["remove"]('open');const _0x826615=_0x21502a["classList"]["toggle"]("open");_0x340ce1["classList"]["toggle"]("open",_0x826615);},document["addEventListener"]("click",_0x221a4b=>{const _0x557566=_0x596ad2,_0x3ca1b3=_0x23508b;!_0x221a4b["target"]["closest"]("#miner-dropdown-toggle")&&!_0x221a4b["target"]["closest"]("#miner-dropdown-menu")&&(_0x4224fe["classList"]["remove"]("open"),_0x201d39["classList"]["remove"]("open")),!_0x221a4b["target"]["closest"]("#miner-strat-toggle")&&!_0x221a4b["target"]["closest"]("#miner-strat-menu")&&(_0x21502a["classList"]["remove"]("open"),_0x340ce1["classList"]["remove"]("open"));});function _0x2f3983(_0x5a527e){const _0x4fac7a=_0x596ad2,_0x11f78a=_0x23508b;_0x4b2ce4["currentStrategy"]=_0x5a527e;const _0x5cde42=_0x549b02["find"](_0xdc459e=>_0xdc459e["key"]===_0x5a527e)||_0x549b02[0x0];document["getElementById"]("miner-strat-title")["textContent"]=_0x5cde42["name"],_0x426066["querySelectorAll"](".miner-strat-item")["forEach"](_0x54c565=>{const _0x1b2be9=_0x4fac7a;_0x54c565['classList']['toggle']("active",_0x54c565['getAttribute']("data-strat")===_0x5a527e);}),_0x21502a["classList"]["remove"]("open"),_0x340ce1["classList"]["remove"]("open");const _0x1be5b3=document["getElementById"]("miner-lbl-target"),_0x382dfd=document["getElementById"]("miner-input-target");_0x5cde42["type"]==="quota"?(_0x1be5b3['textContent']="الكمية المطلوبة :",_0x382dfd['value']=0x14,_0x91676f([0x3,0x5,0x14,"الكل"]),_0x4b2ce4["tools"]['pickaxe']=!![],_0x4b2ce4['tools']['explosive']=![],_0x4b2ce4["tools"]["tnt"]=![]):(_0x1be5b3["textContent"]="عدد الطوابق :",_0x382dfd["value"]=0x5,_0x91676f([0x3,0x5,0x14,"الكل"]),_0x5a527e==="speed"?(_0x4b2ce4['tools']["pickaxe"]=!![],_0x4b2ce4["tools"]["explosive"]=![],_0x4b2ce4["tools"]["tnt"]=![]):(_0x4b2ce4['tools']["pickaxe"]=!![],_0x4b2ce4['tools']["explosive"]=!![],_0x4b2ce4["tools"]["tnt"]=!![])),_0x31f047();}_0x426066["querySelectorAll"](".miner-strat-item")["forEach"](_0x54a21d=>{const _0xa49ed=_0x23508b;_0x54a21d["onclick"]=()=>{const _0x1e60cc=_0xa49ed;let _0x300998=_0x54a21d['getAttribute']("data-strat");_0x2f3983(_0x300998);};}),_0x426066["querySelectorAll"](".miner-tools-grid .miner-toggle-btn")["forEach"](_0x13a2e2=>{const _0x46f015=_0x596ad2;_0x13a2e2["onclick"]=()=>{const _0x18e9ea=_0x48b7,_0x5554ff=_0x46f015;let _0x30de71=_0x13a2e2['getAttribute']("data-tool");_0x4b2ce4["tools"][_0x30de71]=!_0x4b2ce4["tools"][_0x30de71],_0x31f047();};});function _0x31f047(){const _0x2d9953=_0x596ad2;_0x426066["querySelectorAll"](".miner-tools-grid .miner-toggle-btn")['forEach'](_0x491adc=>{const _0x5c13bb=_0x48b7,_0x4e112b=_0x2d9953;let _0x45eab9=_0x491adc["getAttribute"]('data-tool');_0x491adc['classList']["toggle"]('active',!!_0x4b2ce4['tools'][_0x45eab9]);});}_0x426066["querySelectorAll"](".miner-preset-item input")['forEach'](_0x3c6171=>{const _0x48b63b=_0x23508b;_0x3c6171["onchange"]=_0x3f25a5=>{const _0x37c548=_0x4e21,_0x4fac33=_0x48b63b;_0x3f25a5["stopPropagation"]();let _0x53a935=_0x3c6171["getAttribute"]('data-cat'),_0x8f9880=_0x3c6171["getAttribute"]("data-act");if(_0x8f9880==="all")_0x379247["forEach"](_0x3737d0=>_0x4b2ce4["selectedGifts"]["add"](_0x3737d0['id'])),_0x3c6171["checked"]=![];else{if(_0x8f9880==="none")_0x4b2ce4["selectedGifts"]["clear"](),_0x3c6171["checked"]=![];else{if(_0x53a935){let _0x212e09=_0x1d529f["find"](_0x230593=>_0x230593["key"]===_0x53a935);_0x212e09&&_0x212e09["ids"]['forEach'](_0x5a8aaa=>{const _0x387dfe=_0x4fac33,_0x209433=_0x37c548;_0x3c6171["checked"]?_0x4b2ce4["selectedGifts"]['add'](_0x5a8aaa):_0x4b2ce4["selectedGifts"]["delete"](_0x5a8aaa);});}}}_0x426066["querySelectorAll"](".miner-item-chip")["forEach"](_0x29fbbb=>{const _0x3dc867=_0x4fac33,_0x772d46=_0x37c548;let _0xb159d7=_0x29fbbb['getAttribute']("data-id"),_0x378699=Number(_0xb159d7),_0xfae9ed=isNaN(_0x378699)?_0xb159d7:_0x378699;_0x29fbbb["classList"]["toggle"]('active',_0x4b2ce4["selectedGifts"]['has'](_0xfae9ed));}),_0x432815();};});function _0x432815(){const _0xb3daf0=_0x23508b,_0x156379=_0x596ad2;_0x1d529f['forEach'](_0x168577=>{const _0x2a70dd=_0x4e21,_0x160928=_0x48b7;let _0x161150=_0x426066["querySelector"](".miner-preset-item input[data-cat=\""+_0x168577["key"]+'\x22]');_0x161150&&(_0x161150["checked"]=_0x168577["ids"]["every"](_0x111179=>_0x4b2ce4["selectedGifts"]["has"](_0x111179)));});const _0x45cef8=document["getElementById"]("miner-dropdown-title");_0x45cef8&&(_0x45cef8["textContent"]="قائمة المكافآت : "+_0x4b2ce4["selectedGifts"]["size"]+'\x20');}const _0x5c329e=document["getElementById"]("miner-hidden-toggle"),_0xf4bc00=document["getElementById"]("miner-hidden-status");_0x5c329e["onclick"]=()=>{const _0x210cb7=_0x596ad2,_0x42b28f=_0x23508b;_0x4b2ce4["openTreasurePath"]=![],_0xf4bc00["textContent"]="✓ مفعل",_0x5c329e["style"]['color']="#047857",_0x5c329e["style"]["borderColor"]='#10b981',_0x5c329e['style']["background"]="#ecfdf5";};function _0x91676f(_0x2fe6da){const _0x209dc3=_0x23508b,_0xfdbbaf=_0x596ad2,_0x5eb9e5={'uHPsV':"data-val"};_0x5eb9e5["jzMeL"]=function(_0x44261e,_0x2ceac8){return _0x44261e===_0x2ceac8;},_0x5eb9e5["MRLjG"]="OjZkM",_0x5eb9e5["MdKHG"]="pickaxe",_0x5eb9e5["bgycb"]="explosive",_0x5eb9e5['eLeFp']="tnt",_0x5eb9e5["RpheS"]=function(_0x6e5d4a,_0x9b3453){return _0x6e5d4a===_0x9b3453;};const _0xd86493=document["getElementById"]("miner-quick-btns");if(!_0xd86493)return;_0xd86493["innerHTML"]=_0x2fe6da["map"](_0x27bf76=>"<button class"+"=\"miner-btn-num\" data-val=\""+_0x27bf76+'\x22>'+_0x27bf76+"</button>")["join"](''),_0xd86493["querySelectorAll"](".miner-btn-num")["forEach"](_0x1e9599=>{const _0x87bbf6=_0x209dc3,_0x26ea68=_0xfdbbaf,_0x2554e1={'RbaCa':"data-val",'lMDXt':"miner-input-target",'aItia':function(_0x425cb7,_0x2f1ef2){const _0x48c42e=_0x26ea68;return _0x5eb9e5["jzMeL"](_0x425cb7,_0x2f1ef2);},'gXdfh':_0x5eb9e5["MRLjG"],'aebKe':"quota",'ioDtY':function(_0x5436ee,_0x5aee4c){return _0x5436ee===_0x5aee4c;},'YXreJ':_0x5eb9e5["MdKHG"],'YuaSP':_0x5eb9e5["bgycb"],'tXmSL':_0x5eb9e5["eLeFp"],'dqixo':function(_0x1eada7,_0x5641e4){const _0x402664=_0x87bbf6;return _0x5eb9e5["RpheS"](_0x1eada7,_0x5641e4);}};_0x1e9599["onclick"]=()=>{const _0x289f95=_0x26ea68,_0x1eab25=_0x87bbf6;let _0x1bfb71=_0x1e9599["getAttribute"]("data-val"),_0x2ac835=document["getElementById"]("miner-input-target");if(_0x1bfb71==="الكل")_0x5eb9e5["jzMeL"](_0x2554e1['gXdfh'],'OjZkM')?(_0x4b2ce4['targetFloors']=0x0,_0x2ac835&&(_0x2ac835["value"]=0x0)):(_0x341dae["labelDisplay"]["textColor"]=0xff4b72,_0x2ea8fb["labelDisplay"]["stroke"]=0x1,_0x67c25c["labelDisplay"]["strokeColor"]=0x0);else{let _0x4a40a8=parseInt(_0x1bfb71)||0x1;_0x4b2ce4["currentStrategy"]==="quota"?_0x4b2ce4['targetQuota']=_0x4a40a8:_0x4b2ce4["targetFloors"]=_0x4a40a8,_0x2ac835&&(_0x2ac835['value']=_0x4a40a8);}_0x3589fa();};});}let _0x4c288c=document["getElementById"]("miner-input-target");_0x4c288c["onchange"]=()=>{const _0x58e047=_0x596ad2,_0x3f85a9=_0x23508b;let _0x9d16c8=Math["max"](0x0,parseInt(_0x4c288c["value"])||0x0);if(_0x4b2ce4["currentStrategy"]==="quota")_0x4b2ce4["targetQuota"]=_0x9d16c8;else _0x4b2ce4["targetFloors"]=_0x9d16c8;_0x3589fa();},_0x91676f([0x3,0x5,0x14,"الكل"]);}function _0x3589fa(){const _0x8648af=_0x59724d,_0x2d69ab=_0x474e02;if(!_0x426066||_0x426066["style"]["display"]==="none")return;let _0x1ff95b=unsafeWindow['GF'],_0x43c59c=_0x1ff95b?.['loginModel'],_0x108ef7=_0x1ff95b?.["digMiningModel"],_0x57ee1e=_0x43c59c?.["get_gifts_num_by_id"]?.(0x363a4)||0x0,_0x4e377d=_0x43c59c?.["get_gifts_num_by_id"]?.(0x363a5)||0x0,_0x28d119=_0x43c59c?.["get_gifts_num_by_id"]?.(0x363a6)||0x0,_0x19986e=_0x108ef7?.["getCurrDepth"]?.()||0x0,_0x3706c3=document["getElementById"]("miner-lbl-pick"),_0x1011f5=document["getElementById"]("miner-lbl-exp"),_0x4c448f=document["getElementById"]("miner-lbl-tnt"),_0x12eeac=document["getElementById"]("miner-lbl-depth");_0x3706c3&&(_0x3706c3["textContent"]="⛏️ معول: "+_0x57ee1e);_0x1011f5&&(_0x1011f5["textContent"]="🧨 متفجر: "+_0x4e377d);_0x4c448f&&(_0x4c448f["textContent"]="💣 TNT: "+_0x28d119);if(_0x12eeac){const _0x1440fe=Math['max'](0x0,_0x19986e-(_0x4b2ce4["startDepth"]||_0x19986e)),_0x19191c=_0x4b2ce4["currentStrategy"]==='quota'?_0x4b2ce4["targetQuota"]:_0x4b2ce4["targetFloors"];_0x12eeac["textContent"]="المستوى: "+_0x19986e+'\x20(منجز:\x20'+_0x1440fe+'/'+(_0x19191c||'∞')+')';}let _0x3df56d=document["getElementById"]("miner-btn-toggle");_0x3df56d&&(_0x3df56d["className"]=_0x4b2ce4['isRunning']?"miner-btn miner-btn-stop":"miner-btn miner-btn-start",_0x3df56d["textContent"]=_0x4b2ce4["isRunning"]?'■\x20إيقاف\x20الحفر':"▶ ابدأ التنقيب"),_0x426066["querySelectorAll"](".miner-prio-icon")["forEach"](_0x3bf45c=>{const _0x4128ea=_0x8648af,_0x3323ab=_0x2d69ab;if(!_0x3bf45c['src']||_0x3bf45c['style']["display"]==="none"){let _0x190207=_0x3bf45c['parentElement']?.["getAttribute"]("data-tool"),_0x572cb8=_0x190207==="pickaxe"?0x363a4:_0x190207==="explosive"?0x363a5:_0x190207==="tnt"?0x363a6:null;if(_0x572cb8){let _0x56db09=_0x572cb8?_0x357dbe(_0x572cb8):'';_0x56db09&&_0x3bf45c["src"]!==_0x56db09&&(_0x3bf45c['src']=_0x56db09,_0x3bf45c["style"]["display"]='');}}});}function _0x2df847(){const _0x179c5c=_0x59724d,_0x1b236a=_0x474e02;_0x5aa1fe();const _0x52ca41=_0x426066['style']["display"]==="none";_0x426066["style"]["display"]=_0x52ca41?'flex':"none",_0x52ca41&&_0x3589fa();}_0x4b2ce4['toggleUI']=_0x2df847,_0x5aa1fe(),_0x426066["style"]["display"]="none";const _0x336c5a=()=>{const _0x5781c2=_0x474e02,_0x1627a9=_0x59724d;try{const _0x52f170=unsafeWindow["ViewConst"]?.["DigMiningPanel"],_0x16b961=unsafeWindow["App"]?.["ViewManager"]?.["getView"]?.(_0x52f170),_0x1aba98=unsafeWindow["DigMiningPanel"]||_0x16b961?.["constructor"];if(!_0x1aba98?.["prototype"]||!_0x1aba98['prototype']["open"]||_0x1aba98['prototype']["__standaloneMinerHook"])return!!_0x1aba98?.["prototype"]?.["__standaloneMinerHook"];const _0x880d9b=_0x1aba98['prototype']["open"];return _0x1aba98['prototype']['open']=function(..._0x201883){const _0x14ddac=_0x1627a9,_0x24aeb7=_0x880d9b["apply"](this,_0x201883);try{const _0x3a96aa=this,_0x1c6c84=()=>{const _0x3d9fb2=_0x4e21,_0x484bf3=_0x14ddac,_0x558d0a=_0x3a96aa["gpContent"]||_0x3a96aa["groupContent"]||_0x3a96aa["monthGroup"]||_0x3a96aa["content"]||_0x3a96aa["contentGroup"]||_0x3a96aa;if(!_0x558d0a?.["addChild"]||_0x3a96aa["__standaloneMinerButton"])return;const _0x310e39=unsafeWindow['State4Button']||unsafeWindow["eui"]?.['Button'],_0x3a8cf5=unsafeWindow["egret"]?.["TouchEvent"]?.['TOUCH_TAP'];if(!_0x310e39||!_0x3a8cf5)return;const _0x1ac28b=new _0x310e39();_0x1ac28b["name"]="DigMiningPanel_555_65_standalone",_0x1ac28b['skinName']="BtnBlueSkin",_0x1ac28b['label']="⛏ حفر تلقائي ميجا",_0x1ac28b['minWidth']=_0x1ac28b["width"]=0x91,_0x1ac28b['minHeight']=_0x1ac28b['height']=0x23,_0x1ac28b['x']=0x22b,_0x1ac28b['y']=0x41,_0x1ac28b["addEventListener"](_0x3a8cf5,_0x17078c=>{_0x17078c?.["stopPropagation"]?.(),_0x2df847();},_0x3a96aa),_0x558d0a["addChild"](_0x1ac28b),_0x3a96aa["__standaloneMinerButton"]=_0x1ac28b;};if(typeof requestAnimationFrame==="function")requestAnimationFrame(_0x1c6c84);else setTimeout(_0x1c6c84,0x0);}catch(_0x2033eb){}return _0x24aeb7;},_0x1aba98["prototype"]["__standaloneMinerHook"]=!![],!![];}catch(_0x2bf217){return![];}};if(!_0x336c5a()){let _0x3190c4=0x0;const _0x5566db=()=>{if(_0x336c5a()||++_0x3190c4>=0x1e)return;setTimeout(_0x5566db,0x3e8);};setTimeout(_0x5566db,0x3e8);}_0x3589fa();}_0x5f09a9();}catch(_0x47a9e2){unsafeWindow["__standaloneMinerBooted"]=![];}};_0x28324e();}());
+    } catch(errMiner) {
+        console.error("[SupremeFarm] Mining Assistant Error:", errMiner);
+    }
+})();
 
 // --- System Initialization ---
 (function() {
